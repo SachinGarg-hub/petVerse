@@ -7,7 +7,7 @@ import Home from './pages/Home';
 import Reels from './pages/Reels';
 import Adoption from './pages/Adoption';
 import Profile from './pages/Profile';
-import Chat from './pages/Chat';
+import Messages from './pages/Messages';
 import Explore from './pages/Explore';
 import SocialAuth from './pages/SocialAuth';
 import AdoptionDetail from './pages/AdoptionDetail';
@@ -50,7 +50,7 @@ function AppContent() {
           <Route path="adoption" element={<Adoption />} />
           <Route path="adoption/:id" element={<AdoptionDetail />} />
           <Route path="profile/:id" element={<Profile />} />
-          <Route path="chat" element={<Chat />} />
+          <Route path="messages" element={<Messages />} />
           <Route path="explore" element={<Explore />} />
         </Route>
       </Routes>

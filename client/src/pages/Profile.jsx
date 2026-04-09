@@ -40,9 +40,22 @@ const Profile = () => {
   const handleFollow = async () => {
     try {
       setIsFollowing(!isFollowing);
+      setUser(prev => ({
+        ...prev,
+        followers: isFollowing 
+          ? prev.followers.filter(f => f._id !== currentUser?._id)
+          : [...prev.followers, { _id: currentUser?._id }]
+      }));
       await followUser(id);
     } catch (err) {
       setIsFollowing(isFollowing);
+      // Revert if error
+      setUser(prev => ({
+        ...prev,
+        followers: !isFollowing 
+          ? prev.followers.filter(f => f._id !== currentUser?._id)
+          : [...prev.followers, { _id: currentUser?._id }]
+      }));
     }
   };
 

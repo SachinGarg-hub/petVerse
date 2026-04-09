@@ -50,8 +50,8 @@ const Navbar = () => {
             {isActive('/adoption') ? <MdPets size={28} /> : <MdOutlinePets size={28} />}
             <span className="hidden lg:block">Adopt</span>
           </Link>
-          <Link to="/chat" className={`sidebar-link ${isActive('/chat') ? 'active' : ''}`}>
-            {isActive('/chat') ? <HiChat size={28} /> : <HiOutlineChat size={28} />}
+          <Link to="/messages" className={`sidebar-link ${isActive('/messages') ? 'active' : ''}`}>
+            {isActive('/messages') ? <HiChat size={28} /> : <HiOutlineChat size={28} />}
             <span className="hidden lg:block">Messages</span>
           </Link>
           <Link to={`/profile/${user?._id}`} className={`sidebar-link ${isActive(`/profile/${user?._id}`) ? 'active' : ''}`}>

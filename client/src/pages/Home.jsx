@@ -12,12 +12,13 @@ const Home = () => {
   const [suggested, setSuggested] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [feedType, setFeedType] = useState('for-you');
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
 
-  const fetchPosts = async (p = 1) => {
+  const fetchPosts = async (p = 1, type = feedType) => {
     try {
-      const res = await getPosts(p);
+      const res = await getPosts(p, type === 'following' ? 'following' : '');
       if (p === 1) {
         setPosts(res.data.posts);
       } else {
@@ -41,9 +42,9 @@ const Home = () => {
   };
 
   useEffect(() => {
-    fetchPosts();
-    fetchSuggested();
-  }, []);
+    fetchPosts(1, feedType);
+    if (suggested.length === 0) fetchSuggested();
+  }, [feedType]);
 
   const handleUpdatePost = (updatedPost) => {
     setPosts(posts.map(p => p._id === updatedPost._id ? updatedPost : p));
@@ -82,6 +83,22 @@ const Home = () => {
             className="w-12 h-12 gradient-primary rounded-2xl flex items-center justify-center text-white shadow-glow hover:scale-105 active:scale-95 transition-all"
           >
             <HiPlus size={24} />
+          </button>
+        </div>
+
+        {/* Feed Tabs */}
+        <div className="flex justify-center mb-6 border-b border-gray-100 dark:border-white/5">
+          <button 
+            onClick={() => { setFeedType('for-you'); setPage(1); setLoading(true); setPosts([]); }}
+            className={`px-8 py-4 flex flex-col items-center gap-1 font-bold text-sm transition-all border-b-2 ${feedType === 'for-you' ? 'border-petverse-purple text-petverse-purple' : 'border-transparent text-gray-400'}`}
+          >
+            FOR YOU
+          </button>
+          <button 
+            onClick={() => { setFeedType('following'); setPage(1); setLoading(true); setPosts([]); }}
+            className={`px-8 py-4 flex flex-col items-center gap-1 font-bold text-sm transition-all border-b-2 ${feedType === 'following' ? 'border-petverse-purple text-petverse-purple' : 'border-transparent text-gray-400'}`}
+          >
+            FOLLOWING
           </button>
         </div>
 

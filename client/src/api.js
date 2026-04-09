@@ -27,7 +27,7 @@ export const uploadFile = (file) => {
 };
 
 // Posts
-export const getPosts = (page = 1) => API.get(`/posts?page=${page}&limit=10`);
+export const getPosts = (page = 1, type = '') => API.get(`/posts?page=${page}&limit=10${type ? `&type=${type}` : ''}`);
 export const createPost = (data) => API.post('/posts', data);
 export const likePost = (id) => API.put(`/posts/${id}/like`);
 export const commentOnPost = (id, text) => API.post(`/posts/${id}/comment`, { text });

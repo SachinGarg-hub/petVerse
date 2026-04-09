@@ -1,18 +1,22 @@
 import { useState, useEffect } from 'react';
-import { searchUsers, getPosts } from '../api';
+import { searchUsers, getPosts, getSuggestedUsers } from '../api';
 import { HiSearch, HiOutlineViewGrid } from 'react-icons/hi';
 import { Link } from 'react-router-dom';
 
 const Explore = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
-  const [explorePosts, setExplorePosts] = useState([]);
+  const [suggestedUsers, setSuggestedUsers] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const fetchExploreData = async () => {
     try {
-      const res = await getPosts(1);
-      setExplorePosts(res.data.posts);
+      const [postsRes, suggestedRes] = await Promise.all([
+        getPosts(1),
+        getSuggestedUsers()
+      ]);
+      setExplorePosts(postsRes.data.posts);
+      setSuggestedUsers(suggestedRes.data);
     } catch (err) {
       console.error(err);
     } finally {
@@ -82,6 +86,28 @@ const Explore = () => {
           </button>
         ))}
       </div>
+
+      {/* Suggested Users */}
+      {suggestedUsers.length > 0 && !searchTerm && (
+        <div className="mb-8">
+          <h2 className="text-xl font-bold dark:text-white mb-4">Suggested Pet Lovers</h2>
+          <div className="flex gap-4 overflow-x-auto hide-scrollbar pb-4">
+            {suggestedUsers.map(user => (
+              <Link key={user._id} to={`/profile/${user._id}`} className="card min-w-[200px] p-6 flex flex-col items-center text-center hover:border-petverse-purple transition-colors">
+                {user.profilePic ? (
+                  <img src={user.profilePic} alt={user.username} className="w-16 h-16 rounded-full object-cover mb-3" />
+                ) : (
+                  <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-purple-400 to-pink-400 flex items-center justify-center text-white font-bold text-xl mb-3">
+                    {user.username.charAt(0).toUpperCase()}
+                  </div>
+                )}
+                <p className="font-bold text-gray-800 dark:text-white mb-1">{user.username}</p>
+                <p className="text-xs text-gray-500 line-clamp-2">{user.bio || 'New to PetVerse'}</p>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Explore Grid */}
       <div>

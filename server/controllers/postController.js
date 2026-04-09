@@ -21,16 +21,25 @@ exports.getAllPosts = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
+    const type = req.query.type;
     const skip = (page - 1) * limit;
 
-    const posts = await Post.find()
+    let filter = {};
+    if (type === 'following') {
+      const currentUser = await User.findById(req.userId);
+      if (currentUser) {
+        filter = { user: { $in: currentUser.following } };
+      }
+    }
+
+    const posts = await Post.find(filter)
       .populate('user', 'username profilePic')
       .populate('comments.user', 'username profilePic')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
 
-    const total = await Post.countDocuments();
+    const total = await Post.countDocuments(filter);
 
     res.json({
       posts,
