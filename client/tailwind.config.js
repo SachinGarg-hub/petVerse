@@ -32,8 +32,8 @@ export default {
         petverse: {
           bg: '#faf5ff',
           card: '#ffffff',
-          dark: '#0f0a1a',
-          darkCard: '#1a1425',
+          dark: '#000000',
+          darkCard: '#111111',
           purple: '#a855f7',
           pink: '#ec4899',
           blue: '#6366f1',
