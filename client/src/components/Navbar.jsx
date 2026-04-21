@@ -13,12 +13,13 @@ import {
   HiOutlineUser,
   HiFilm,
   HiOutlineFilm,
-  HiPlusCircle
+  HiPlusCircle,
+  HiOutlineLogout
 } from 'react-icons/hi';
 import { MdOutlinePets, MdPets } from 'react-icons/md';
 
 const Navbar = () => {
-  const { user, toggleDark, darkMode } = useAuth();
+  const { user, toggleDark, darkMode, logout } = useAuth();
   const location = useLocation();
 
   const isActive = (path) => location.pathname === path;
@@ -74,6 +75,13 @@ const Navbar = () => {
               {user?.username?.charAt(0).toUpperCase()}
             </div>
           )}
+          <button
+            onClick={logout}
+            className="w-10 h-10 rounded-full flex items-center justify-center text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"
+            title="Logout"
+          >
+            <HiOutlineLogout size={24} />
+          </button>
         </div>
       </div>
     </nav>
