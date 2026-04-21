@@ -17,7 +17,7 @@ const Chat = () => {
   const scrollRef = useRef();
 
   useEffect(() => {
-    socket.current = io('http://localhost:5000');
+    socket.current = io(import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000');
     socket.current.emit('addUser', user?._id);
     socket.current.on('getOnlineUsers', (users) => {
       setOnlineUsers(users);
