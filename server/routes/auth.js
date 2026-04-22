@@ -17,7 +17,8 @@ router.get('/google', passport.authenticate('google', { scope: ['profile', 'emai
 
 router.get('/google/callback', passport.authenticate('google', { failureRedirect: '/login', session: false }), (req, res) => {
   const token = generateToken(req.user._id);
-  res.redirect(`http://localhost:5173/social-auth?token=${token}`);
+  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+  res.redirect(`${frontendUrl}/social-auth?token=${token}`);
 });
 
 // Facebook OAuth
@@ -25,7 +26,8 @@ router.get('/facebook', passport.authenticate('facebook', { scope: ['email'], se
 
 router.get('/facebook/callback', passport.authenticate('facebook', { failureRedirect: '/login', session: false }), (req, res) => {
   const token = generateToken(req.user._id);
-  res.redirect(`http://localhost:5173/social-auth?token=${token}`);
+  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+  res.redirect(`${frontendUrl}/social-auth?token=${token}`);
 });
 
 module.exports = router;
