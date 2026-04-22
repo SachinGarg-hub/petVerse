@@ -6,6 +6,10 @@ const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const auth = require('../middleware/auth');
 
 // Cloudinary configuration
+if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
+  console.error('❌  Cloudinary credentials missing in .env! Uploads will fail.');
+}
+
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
@@ -40,6 +44,7 @@ router.post('/', auth, upload.single('file'), (req, res) => {
       resource_type: req.file.mimetype.startsWith('video') ? 'video' : 'image'
     });
   } catch (error) {
+    console.error('❌  Upload failed:', error);
     res.status(500).json({ message: error.message });
   }
 });
