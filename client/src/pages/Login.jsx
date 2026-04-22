@@ -107,6 +107,26 @@ const Login = () => {
               )}
             </button>
 
+            <button
+              type="button"
+              onClick={async () => {
+                setLoading(true);
+                try {
+                  const res = await loginApi({ email: 'demo@petverse.com', password: 'Demo@1234' });
+                  loginUser(res.data.user, res.data.token);
+                  navigate('/');
+                } catch (err) {
+                  setError('Demo login failed. Please try again.');
+                } finally {
+                  setLoading(false);
+                }
+              }}
+              className="w-full mt-4 py-3 px-4 rounded-2xl bg-white/5 border border-purple-500/30 text-purple-600 dark:text-purple-400 font-bold text-sm hover:bg-purple-500/10 transition-all flex items-center justify-center gap-2"
+            >
+              <MdPets className="animate-pulse" />
+              Login as Demo User
+            </button>
+
             <div className="relative flex items-center py-4">
               <div className="flex-grow border-t border-gray-100 dark:border-white/5"></div>
               <span className="flex-shrink mx-4 text-gray-400 text-xs font-bold uppercase tracking-widest">Or continue with</span>
@@ -116,7 +136,10 @@ const Login = () => {
             <div className="flex gap-4">
               <button
                 type="button"
-                onClick={() => window.location.href = 'http://localhost:5000/api/auth/google'}
+                onClick={() => {
+                  const apiUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
+                  window.location.href = `${apiUrl}/api/auth/google`;
+                }}
                 className="flex-1 py-3 px-4 rounded-2xl border border-gray-100 dark:border-white/10 flex items-center justify-center gap-2 text-gray-600 dark:text-gray-300 font-bold text-sm hover:bg-gray-50 dark:hover:bg-white/5 transition-all"
               >
                 <FaGoogle className="text-red-500" />
@@ -124,7 +147,10 @@ const Login = () => {
               </button>
               <button
                 type="button"
-                onClick={() => window.location.href = 'http://localhost:5000/api/auth/facebook'}
+                onClick={() => {
+                  const apiUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
+                  window.location.href = `${apiUrl}/api/auth/facebook`;
+                }}
                 className="flex-1 py-3 px-4 rounded-2xl border border-gray-100 dark:border-white/10 flex items-center justify-center gap-2 text-gray-600 dark:text-gray-300 font-bold text-sm hover:bg-gray-50 dark:hover:bg-white/5 transition-all"
               >
                 <FaFacebook className="text-blue-600" />
