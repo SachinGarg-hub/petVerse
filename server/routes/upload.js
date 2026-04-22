@@ -32,21 +32,29 @@ const storage = new CloudinaryStorage({
 const upload = multer({ storage: storage });
 
 // Route to handle single file upload
-router.post('/', auth, upload.single('file'), (req, res) => {
-  try {
-    if (!req.file) {
-      return res.status(400).json({ message: 'No file uploaded' });
+router.post('/', auth, (req, res) => {
+  upload.single('file')(req, res, (err) => {
+    if (err) {
+      console.error('❌  Upload Middleware Error:', err);
+      return res.status(500).json({ message: err.message || 'Error occurred during file upload to Cloudinary' });
     }
-    // Return the secure URL to the frontend
-    res.json({ 
-      url: req.file.path, 
-      public_id: req.file.filename,
-      resource_type: req.file.mimetype.startsWith('video') ? 'video' : 'image'
-    });
-  } catch (error) {
-    console.error('❌  Upload failed:', error);
-    res.status(500).json({ message: error.message });
-  }
+
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: 'No file uploaded' });
+      }
+      
+      // Return the secure URL to the frontend
+      res.json({ 
+        url: req.file.path, 
+        public_id: req.file.filename,
+        resource_type: req.file.mimetype.startsWith('video') ? 'video' : 'image'
+      });
+    } catch (error) {
+      console.error('❌  Upload processing error:', error);
+      res.status(500).json({ message: error.message });
+    }
+  });
 });
 
 module.exports = router;
