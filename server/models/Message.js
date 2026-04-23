@@ -13,7 +13,13 @@ const messageSchema = new mongoose.Schema(
     },
     text: {
       type: String,
-      required: true,
+    },
+    mediaUrl: {
+      type: String,
+    },
+    mediaType: {
+      type: String,
+      enum: ['image', 'video'],
     },
     read: {
       type: Boolean,

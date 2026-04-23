@@ -62,7 +62,7 @@ const Profile = () => {
   const handleMessage = async () => {
     try {
       await createConversation(id);
-      navigate('/chat');
+      navigate('/messages');
     } catch (err) {
       console.error(err);
     }

@@ -140,13 +140,17 @@ const Navbar = () => {
           >
             {darkMode ? '☀️' : '🌙'}
           </button>
-          {user?.profilePic ? (
-            <img src={user.profilePic} alt="profile" className="w-10 h-10 rounded-full object-cover border-2 border-petverse-purple" />
-          ) : (
-            <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-purple-400 to-pink-400 flex items-center justify-center text-white font-bold">
-              {user?.username?.charAt(0).toUpperCase()}
-            </div>
-          )}
+          
+          <Link to={`/profile/${user?._id}`} className="hover:scale-110 transition-transform">
+            {user?.profilePic ? (
+              <img src={user.profilePic} alt="profile" className="w-10 h-10 rounded-full object-cover border-2 border-petverse-purple" />
+            ) : (
+              <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-purple-400 to-pink-400 flex items-center justify-center text-white font-bold">
+                {user?.username?.charAt(0).toUpperCase()}
+              </div>
+            )}
+          </Link>
+
           <button
             onClick={logout}
             className="w-10 h-10 rounded-full flex items-center justify-center text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"
