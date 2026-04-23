@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const createNotification = require('../utils/notification');
 
 exports.getUser = async (req, res) => {
   try {
@@ -51,6 +52,17 @@ exports.followUser = async (req, res) => {
 
     await currentUser.save();
     await userToFollow.save();
+
+    // Trigger notification
+    if (!isFollowing) {
+      const io = req.app.get('socketio');
+      const onlineUsers = req.app.get('onlineUsers');
+      await createNotification(io, onlineUsers, {
+        recipient: req.params.id,
+        sender: req.userId,
+        type: 'follow'
+      });
+    }
 
     res.json({
       following: currentUser.following,

@@ -20,6 +20,7 @@ const adoptionRoutes = require('./routes/adoption');
 const userRoutes = require('./routes/users');
 const messageRoutes = require('./routes/messages');
 const uploadRoutes = require('./routes/upload');
+const notificationRoutes = require('./routes/notifications');
 
 const app = express();
 const server = http.createServer(app);
@@ -29,6 +30,9 @@ const io = new Server(server, {
     methods: ['GET', 'POST'],
   },
 });
+
+app.set('socketio', io);
+app.set('onlineUsers', onlineUsers);
 
 // Middleware
 app.use(cors());
@@ -42,6 +46,7 @@ app.use('/api/adoption', adoptionRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // Socket.io for real-time chat
 const onlineUsers = new Map();

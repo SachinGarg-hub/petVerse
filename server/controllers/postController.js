@@ -1,5 +1,5 @@
-const Post = require('../models/Post');
 const User = require('../models/User');
+const createNotification = require('../utils/notification');
 
 exports.createPost = async (req, res) => {
   try {
@@ -76,6 +76,19 @@ exports.likePost = async (req, res) => {
       post.likes.splice(index, 1);
     }
     await post.save();
+
+    // Trigger notification
+    if (index === -1) { // Only notify on Like, not unlike
+      const io = req.app.get('socketio');
+      const onlineUsers = req.app.get('onlineUsers');
+      await createNotification(io, onlineUsers, {
+        recipient: post.user,
+        sender: req.userId,
+        type: 'like',
+        post: post._id
+      });
+    }
+
     res.json(post);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -89,6 +102,17 @@ exports.commentOnPost = async (req, res) => {
 
     post.comments.push({ user: req.userId, text: req.body.text });
     await post.save();
+
+    // Trigger notification
+    const io = req.app.get('socketio');
+    const onlineUsers = req.app.get('onlineUsers');
+    await createNotification(io, onlineUsers, {
+      recipient: post.user,
+      sender: req.userId,
+      type: 'comment',
+      post: post._id,
+      content: req.body.text
+    });
 
     const updated = await Post.findById(req.params.id)
       .populate('user', 'username profilePic')

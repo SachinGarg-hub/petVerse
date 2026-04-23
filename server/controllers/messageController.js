@@ -1,4 +1,5 @@
 const { Message, Conversation } = require('../models/Message');
+const createNotification = require('../utils/notification');
 
 exports.createConversation = async (req, res) => {
   try {
@@ -49,6 +50,22 @@ exports.sendMessage = async (req, res) => {
     });
 
     const populated = await message.populate('sender', 'username profilePic');
+
+    // Trigger notification
+    const conversation = await Conversation.findById(conversationId);
+    const recipientId = conversation.members.find(m => m.toString() !== req.userId);
+    
+    if (recipientId) {
+      const io = req.app.get('socketio');
+      const onlineUsers = req.app.get('onlineUsers');
+      await createNotification(io, onlineUsers, {
+        recipient: recipientId,
+        sender: req.userId,
+        type: 'message',
+        content: text
+      });
+    }
+
     res.status(201).json(populated);
   } catch (error) {
     res.status(500).json({ message: error.message });

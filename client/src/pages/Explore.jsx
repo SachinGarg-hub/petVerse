@@ -7,6 +7,7 @@ const Explore = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [suggestedUsers, setSuggestedUsers] = useState([]);
+  const [explorePosts, setExplorePosts] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const fetchExploreData = async () => {
@@ -127,7 +128,7 @@ const Explore = () => {
             {explorePosts.map((post, index) => (
               <Link 
                 key={post._id} 
-                to={`/`} // Simple link to Home for now
+                to={`/`} 
                 className={`group relative aspect-square overflow-hidden rounded-2xl md:rounded-4xl transition-transform hover:scale-[1.02] ${index % 5 === 0 ? 'md:col-span-2 md:row-span-2' : ''}`}
               >
                 <img src={post.mediaUrl} alt="explore" className="w-full h-full object-cover" />

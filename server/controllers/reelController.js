@@ -1,4 +1,5 @@
 const Reel = require('../models/Reel');
+const createNotification = require('../utils/notification');
 
 exports.createReel = async (req, res) => {
   try {
@@ -51,6 +52,19 @@ exports.likeReel = async (req, res) => {
       reel.likes.splice(index, 1);
     }
     await reel.save();
+
+    // Trigger notification
+    if (index === -1) {
+      const io = req.app.get('socketio');
+      const onlineUsers = req.app.get('onlineUsers');
+      await createNotification(io, onlineUsers, {
+        recipient: reel.user,
+        sender: req.userId,
+        type: 'reel_like',
+        reel: reel._id
+      });
+    }
+
     res.json(reel);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -64,6 +78,17 @@ exports.commentOnReel = async (req, res) => {
 
     reel.comments.push({ user: req.userId, text: req.body.text });
     await reel.save();
+
+    // Trigger notification
+    const io = req.app.get('socketio');
+    const onlineUsers = req.app.get('onlineUsers');
+    await createNotification(io, onlineUsers, {
+      recipient: reel.user,
+      sender: req.userId,
+      type: 'comment',
+      reel: reel._id,
+      content: req.body.text
+    });
 
     const updated = await Reel.findById(req.params.id)
       .populate('user', 'username profilePic')

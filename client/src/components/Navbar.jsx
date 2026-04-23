@@ -1,5 +1,8 @@
+import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { getNotifications, markAllNotificationsRead } from '../api';
+import NotificationDropdown from './NotificationDropdown';
 import { 
   HiHome, 
   HiOutlineHome, 
@@ -19,8 +22,51 @@ import {
 import { MdOutlinePets, MdPets } from 'react-icons/md';
 
 const Navbar = () => {
-  const { user, toggleDark, darkMode, logout } = useAuth();
+  const { user, toggleDark, darkMode, logout, socket } = useAuth();
   const location = useLocation();
+  const [notifications, setNotifications] = useState([]);
+  const [showNotifs, setShowNotifs] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      if (!user) return;
+      try {
+        const res = await getNotifications();
+        setNotifications(res.data);
+        setUnreadCount(res.data.filter(n => !n.read).length);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchNotifications();
+  }, [user]);
+
+  useEffect(() => {
+    if (socket?.current) {
+      socket.current.on('newNotification', (notif) => {
+        setNotifications(prev => [notif, ...prev]);
+        setUnreadCount(prev => prev + 1);
+        
+        // Optional: show a toast or browser notification here
+      });
+    }
+    return () => {
+      if (socket?.current) {
+        socket.current.off('newNotification');
+      }
+    };
+  }, [socket, socket?.current]);
+
+  const handleMarkAllRead = async () => {
+    try {
+      await markAllNotificationsRead();
+      setNotifications(notifications.map(n => ({ ...n, read: true })));
+      setUnreadCount(0);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const isActive = (path) => location.pathname === path;
 
@@ -62,6 +108,32 @@ const Navbar = () => {
         </div>
 
         <div className="hidden md:flex items-center gap-4">
+          <div className="relative">
+            <button 
+              onClick={() => {
+                setShowNotifs(!showNotifs);
+                if (unreadCount > 0) handleMarkAllRead();
+              }}
+              className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors relative ${showNotifs ? 'bg-petverse-purple/10 text-petverse-purple' : 'hover:bg-gray-100 dark:hover:bg-white/10 text-gray-500'}`}
+            >
+              {showNotifs ? <HiHeart size={24} /> : <HiOutlineHeart size={24} />}
+              {unreadCount > 0 && (
+                <span className="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center animate-pulse border-2 border-white dark:border-petverse-dark">
+                  {unreadCount}
+                </span>
+              )}
+            </button>
+            {showNotifs && (
+              <NotificationDropdown 
+                notifications={notifications} 
+                onRead={(id) => {
+                  setNotifications(notifications.map(n => n._id === id ? { ...n, read: true } : n));
+                }}
+                onClose={() => setShowNotifs(false)}
+              />
+            )}
+          </div>
+
           <button 
             onClick={toggleDark}
             className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"

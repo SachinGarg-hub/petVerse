@@ -1,12 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { getConversations, getMessages, sendMessage, createConversation, searchUsers } from '../api';
-import { io } from 'socket.io-client';
 import { HiOutlineMagnifyingGlass, HiOutlinePaperAirplane } from 'react-icons/hi2';
 import { formatDistanceToNow } from 'date-fns';
 
 const Messages = () => {
-  const { user } = useAuth();
+  const { user, socket } = useAuth();
   const [conversations, setConversations] = useState([]);
   const [currentChat, setCurrentChat] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -16,19 +15,15 @@ const Messages = () => {
   const [isTyping, setIsTyping] = useState(false);
   const [onlineUsers, setOnlineUsers] = useState([]);
   
-  const socket = useRef();
   const scrollRef = useRef();
 
-  // Initialize Socket Connection
+  // Socket Listeners
   useEffect(() => {
-    socket.current = io(import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000');
-    
-    if (user) {
-      socket.current.emit('addUser', user._id);
-      socket.current.on('getOnlineUsers', (users) => {
-        setOnlineUsers(users);
-      });
-    }
+    if (!socket?.current) return;
+
+    socket.current.on('getOnlineUsers', (users) => {
+      setOnlineUsers(users);
+    });
 
     socket.current.on('getMessage', (data) => {
       setMessages((prev) => [...prev, {
@@ -42,9 +37,14 @@ const Messages = () => {
     socket.current.on('userStopTyping', () => setIsTyping(false));
 
     return () => {
-      socket.current.disconnect();
+      if (socket.current) {
+        socket.current.off('getOnlineUsers');
+        socket.current.off('getMessage');
+        socket.current.off('userTyping');
+        socket.current.off('userStopTyping');
+      }
     };
-  }, [user]);
+  }, [socket, socket?.current]);
 
   // Fetch Conversations
   useEffect(() => {

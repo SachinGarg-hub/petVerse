@@ -70,4 +70,9 @@ export const getConversations = () => API.get('/messages/conversations');
 export const sendMessage = (data) => API.post('/messages', data);
 export const getMessages = (conversationId) => API.get(`/messages/${conversationId}`);
 
+// Notifications
+export const getNotifications = () => API.get('/notifications');
+export const markNotificationRead = (id) => API.put(`/notifications/${id}/read`);
+export const markAllNotificationsRead = () => API.put('/notifications/read-all');
+
 export default API;

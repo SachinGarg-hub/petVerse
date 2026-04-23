@@ -1,5 +1,6 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { getMe } from '../api';
+import { io } from 'socket.io-client';
 
 const AuthContext = createContext(null);
 
@@ -27,6 +28,21 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
+  const socket = useRef();
+
+  useEffect(() => {
+    if (user) {
+      socket.current = io(import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000');
+      socket.current.emit('addUser', user._id);
+    }
+
+    return () => {
+      if (socket.current) {
+        socket.current.disconnect();
+      }
+    };
+  }, [user]);
+
   useEffect(() => {
     if (darkMode) {
       document.documentElement.classList.add('dark');
@@ -50,7 +66,7 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider
-      value={{ user, setUser, loading, loginUser, logout, darkMode, toggleDark }}
+      value={{ user, setUser, loading, loginUser, logout, darkMode, toggleDark, socket }}
     >
       {children}
     </AuthContext.Provider>
