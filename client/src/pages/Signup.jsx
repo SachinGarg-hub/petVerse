@@ -5,6 +5,7 @@ import { register as signupApi } from '../api';
 import { HiEye, HiEyeOff } from 'react-icons/hi';
 import { MdPets } from 'react-icons/md';
 import { FaGoogle, FaFacebook } from 'react-icons/fa';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const Signup = () => {
   const [formData, setFormData] = useState({ 
@@ -55,137 +56,188 @@ const Signup = () => {
 
   return (
     <div className="min-h-screen gradient-bg flex items-center justify-center px-4 py-8 relative overflow-hidden">
-      {/* Decorative blobs */}
-      <div className="absolute top-[-5%] right-[-5%] w-64 h-64 bg-teal-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-float" />
-      <div className="absolute bottom-[-5%] left-[-5%] w-64 h-64 bg-orange-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-float" style={{ animationDelay: '3s' }} />
+      {/* Decorative Floating Elements */}
+      <motion.div 
+        animate={{ 
+          y: [0, -50, 0],
+          x: [0, 30, 0],
+          rotate: [0, 45, 0]
+        }}
+        transition={{ duration: 15, repeat: Infinity }}
+        className="absolute top-[10%] right-[10%] w-64 h-64 bg-teal-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20"
+      />
+      <motion.div 
+        animate={{ 
+          y: [0, 50, 0],
+          x: [0, -40, 0],
+          rotate: [0, -30, 0]
+        }}
+        transition={{ duration: 18, repeat: Infinity }}
+        className="absolute bottom-[10%] left-[10%] w-64 h-64 bg-orange-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20"
+      />
 
-      <div className="w-full max-w-md z-10">
-        <div className="text-center mb-8 animate-fade-in">
-          <div className="inline-flex w-14 h-14 gradient-primary rounded-2xl items-center justify-center text-white shadow-glow mb-4">
-            <MdPets size={30} />
-          </div>
-          <h1 className="text-3xl font-display font-extrabold gradient-text">PetVerse</h1>
-          <p className="text-gray-500 dark:text-gray-400 mt-2 font-medium">Join the ultimate pet community! 🐾</p>
+      <motion.div 
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="w-full max-w-md z-10"
+      >
+        <div className="text-center mb-8">
+          <motion.div 
+            whileHover={{ scale: 1.1, rotate: -10 }}
+            className="inline-flex w-16 h-16 gradient-primary rounded-2xl items-center justify-center text-white shadow-glow mb-4 cursor-pointer"
+          >
+            <MdPets size={32} />
+          </motion.div>
+          <h1 className="text-4xl font-display font-black gradient-text tracking-tighter">Join PetVerse</h1>
+          <p className="text-gray-500 dark:text-gray-400 mt-2 font-bold uppercase tracking-widest text-[10px]">Your pet's social life starts here 🐾</p>
         </div>
 
-        <div className="glass-strong p-8 rounded-4xl shadow-glass-lg animate-scale-in">
-          <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">Create Account</h2>
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.2 }}
+          className="glass-strong p-8 rounded-[40px] shadow-glass-2xl border border-white/20 dark:border-white/5"
+        >
+          <h2 className="text-2xl font-black text-gray-800 dark:text-white mb-6 tracking-tight">Create Account</h2>
           
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5 ml-1">Username</label>
-              <input
-                type="text"
-                name="username"
-                required
-                placeholder="pet_lover_2024"
-                value={formData.username}
-                onChange={handleChange}
-                className="input-field"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5 ml-1">Email Address</label>
-              <input
-                type="email"
-                name="email"
-                required
-                placeholder="you@example.com"
-                value={formData.email}
-                onChange={handleChange}
-                className="input-field"
-              />
-            </div>
-
-            <div className="relative">
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5 ml-1">Password</label>
-              <input
-                type={showPassword ? 'text' : 'password'}
-                name="password"
-                required
-                placeholder="••••••••"
-                value={formData.password}
-                onChange={handleChange}
-                className="input-field pr-12"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-[38px] text-gray-400"
-              >
-                {showPassword ? <HiEyeOff size={22} /> : <HiEye size={22} />}
-              </button>
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5 ml-1">Confirm Password</label>
-              <input
-                type={showPassword ? 'text' : 'password'}
-                name="confirmPassword"
-                required
-                placeholder="••••••••"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                className="input-field"
-              />
-            </div>
-
-            {error && (
-              <div className="bg-red-50 dark:bg-red-900/20 text-red-500 text-sm p-4 rounded-xl border border-red-100 dark:border-red-800 animate-slide-up">
-                {error}
+            <div className="grid grid-cols-1 gap-4">
+              <div className="space-y-1">
+                <label className="block text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest ml-1">Username</label>
+                <input
+                  type="text"
+                  name="username"
+                  required
+                  placeholder="cool_cat_24"
+                  value={formData.username}
+                  onChange={handleChange}
+                  className="w-full px-5 py-3.5 rounded-2xl bg-gray-50 dark:bg-white/5 border-transparent focus:border-petverse-purple focus:ring-0 text-sm font-medium transition-all"
+                />
               </div>
-            )}
 
-            <button
+              <div className="space-y-1">
+                <label className="block text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest ml-1">Email Address</label>
+                <input
+                  type="email"
+                  name="email"
+                  required
+                  placeholder="meow@petverse.com"
+                  value={formData.email}
+                  onChange={handleChange}
+                  className="w-full px-5 py-3.5 rounded-2xl bg-gray-50 dark:bg-white/5 border-transparent focus:border-petverse-purple focus:ring-0 text-sm font-medium transition-all"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1 relative">
+                <label className="block text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest ml-1">Password</label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    name="password"
+                    required
+                    placeholder="••••••••"
+                    value={formData.password}
+                    onChange={handleChange}
+                    className="w-full px-5 py-3.5 rounded-2xl bg-gray-50 dark:bg-white/5 border-transparent focus:border-petverse-purple focus:ring-0 text-sm font-medium transition-all"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
+                  >
+                    {showPassword ? <HiEyeOff size={20} /> : <HiEye size={20} />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="block text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest ml-1">Confirm</label>
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  name="confirmPassword"
+                  required
+                  placeholder="••••••••"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  className="w-full px-5 py-3.5 rounded-2xl bg-gray-50 dark:bg-white/5 border-transparent focus:border-petverse-purple focus:ring-0 text-sm font-medium transition-all"
+                />
+              </div>
+            </div>
+
+            <AnimatePresence>
+              {error && (
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  className="bg-red-50 dark:bg-red-900/20 text-red-500 text-[10px] font-black p-3 rounded-2xl border border-red-100 dark:border-red-800 uppercase tracking-wider"
+                >
+                  {error}
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            <motion.button
+              whileHover={{ scale: 1.02, y: -2 }}
+              whileTap={{ scale: 0.98 }}
               type="submit"
               disabled={loading}
-              className="btn-primary w-full mt-4"
+              className="btn-primary w-full py-4 mt-2 font-black shadow-glow-purple"
             >
               {loading ? (
                 <div className="flex items-center justify-center gap-2">
                   <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  <span>Creating account...</span>
+                  <span>Creating...</span>
                 </div>
               ) : (
-                'Sign Up'
+                'Sign Up Now'
               )}
-            </button>
+            </motion.button>
 
             <div className="relative flex items-center py-4">
               <div className="flex-grow border-t border-gray-100 dark:border-white/5"></div>
-              <span className="flex-shrink mx-4 text-gray-400 text-xs font-bold uppercase tracking-widest">Or join with</span>
+              <span className="flex-shrink mx-4 text-gray-400 text-[10px] font-black uppercase tracking-widest">Or join with</span>
               <div className="flex-grow border-t border-gray-100 dark:border-white/5"></div>
             </div>
 
             <div className="flex gap-4">
-              <button
+              <motion.button
+                whileHover={{ y: -2 }}
                 type="button"
-                onClick={() => window.location.href = 'http://localhost:5000/api/auth/google'}
-                className="flex-1 py-3 px-4 rounded-2xl border border-gray-100 dark:border-white/10 flex items-center justify-center gap-2 text-gray-600 dark:text-gray-300 font-bold text-sm hover:bg-gray-50 dark:hover:bg-white/5 transition-all"
+                onClick={() => {
+                  const apiUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
+                  window.location.href = `${apiUrl}/api/auth/google`;
+                }}
+                className="flex-1 py-3 px-4 rounded-2xl bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 flex items-center justify-center gap-2 text-gray-600 dark:text-gray-300 font-bold text-sm hover:shadow-md transition-all"
               >
                 <FaGoogle className="text-red-500" />
                 Google
-              </button>
-              <button
+              </motion.button>
+              <motion.button
+                whileHover={{ y: -2 }}
                 type="button"
-                onClick={() => window.location.href = 'http://localhost:5000/api/auth/facebook'}
-                className="flex-1 py-3 px-4 rounded-2xl border border-gray-100 dark:border-white/10 flex items-center justify-center gap-2 text-gray-600 dark:text-gray-300 font-bold text-sm hover:bg-gray-50 dark:hover:bg-white/5 transition-all"
+                onClick={() => {
+                  const apiUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
+                  window.location.href = `${apiUrl}/api/auth/facebook`;
+                }}
+                className="flex-1 py-3 px-4 rounded-2xl bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 flex items-center justify-center gap-2 text-gray-600 dark:text-gray-300 font-bold text-sm hover:shadow-md transition-all"
               >
                 <FaFacebook className="text-blue-600" />
                 Facebook
-              </button>
+              </motion.button>
             </div>
           </form>
 
-          <p className="text-center mt-8 text-gray-600 dark:text-gray-400">
-            Already have an account?{' '}
-            <Link to="/login" className="text-petverse-purple font-bold hover:underline">
+          <p className="text-center mt-8 text-sm text-gray-500 dark:text-gray-400 font-medium">
+            Member already?{' '}
+            <Link to="/login" className="text-petverse-purple font-black hover:underline">
               Sign in
             </Link>
           </p>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };
