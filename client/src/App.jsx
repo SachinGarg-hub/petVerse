@@ -8,6 +8,8 @@ import Reels from './pages/Reels';
 import Adoption from './pages/Adoption';
 import Profile from './pages/Profile';
 import Messages from './pages/Messages';
+import Explore from './pages/Explore';
+import SocialAuth from './pages/SocialAuth';
 import AdoptionDetail from './pages/AdoptionDetail';
 import Settings from './pages/Settings';
 import { AnimatePresence } from 'framer-motion';
