@@ -3,17 +3,17 @@ import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { 
   HiHome, HiHome as HiHomeActive,
-  HiSearch, HiSearch as HiSearchActive,
+  HiMagnifyingGlass, HiMagnifyingGlass as HiMagnifyingGlassActive,
   HiChatBubbleOvalLeft as HiChat, HiChatBubbleOvalLeft as HiChatActive,
   HiHeart, HiHeart as HiHeartActive,
   HiUser, HiUser as HiUserActive,
   HiFilm, HiFilm as HiFilmActive,
-  HiPlusSquare, HiPlusSquare as HiPlusSquareActive,
+  HiPlusCircle, HiPlusCircle as HiPlusCircleActive,
   HiBars3, HiBars3 as HiBars3Active,
   HiCog6Tooth,
   HiArrowLeftOnRectangle,
-  HiOutlineHome, HiOutlineSearch, HiOutlineChatBubbleOvalLeft as HiOutlineChat,
-  HiOutlineHeart, HiOutlineUser, HiOutlineFilm, HiOutlinePlusSquare, HiOutlineBars3, HiOutlineCog6Tooth
+  HiOutlineHome, HiOutlineMagnifyingGlass, HiOutlineChatBubbleOvalLeft as HiOutlineChat,
+  HiOutlineHeart, HiOutlineUser, HiOutlineFilm, HiOutlinePlusCircle, HiOutlineBars3, HiOutlineCog6Tooth
 } from 'react-icons/hi2';
 import { MdOutlinePets, MdPets } from 'react-icons/md';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -72,7 +72,7 @@ const Sidebar = () => {
 
   const navItems = [
     { name: 'Home', path: '/', icon: HiOutlineHome, activeIcon: HiHomeActive },
-    { name: 'Search', onClick: () => { setIsSearchOpen(!isSearchOpen); setIsActivityOpen(false); }, icon: HiOutlineSearch, activeIcon: HiSearchActive, active: isSearchOpen },
+    { name: 'Search', onClick: () => { setIsSearchOpen(!isSearchOpen); setIsActivityOpen(false); }, icon: HiOutlineMagnifyingGlass, activeIcon: HiMagnifyingGlassActive, active: isSearchOpen },
     { name: 'Reels', path: '/reels', icon: HiOutlineFilm, activeIcon: HiFilmActive },
     { name: 'Adopt', path: '/adoption', icon: MdOutlinePets, activeIcon: MdPets },
     { name: 'Messages', path: '/messages', icon: HiOutlineChat, activeIcon: HiChatActive },
@@ -88,7 +88,7 @@ const Sidebar = () => {
       badge: unreadCount,
       active: isActivityOpen
     },
-    { name: 'Create', onClick: () => setIsCreateModalOpen(true), icon: HiOutlinePlusSquare, activeIcon: HiPlusSquareActive },
+    { name: 'Create', onClick: () => setIsCreateModalOpen(true), icon: HiOutlinePlusCircle, activeIcon: HiPlusCircleActive },
     { name: 'Profile', path: `/profile/${user?._id}`, icon: HiOutlineUser, activeIcon: HiUserActive },
   ];
 
@@ -221,7 +221,7 @@ const Sidebar = () => {
           onClick={() => setIsCreateModalOpen(true)}
           className="w-12 h-12 gradient-primary rounded-2xl flex items-center justify-center text-white shadow-glow -translate-y-4 border-4 border-white dark:border-petverse-dark"
         >
-          <HiPlusSquare size={24} />
+          <HiPlusCircle size={24} />
         </button>
         <Link to={`/profile/${user?._id}`} className={`p-2 ${isActive(`/profile/${user?._id}`) ? 'text-petverse-purple' : 'text-gray-500'}`}>
           {user?.profilePic ? (
