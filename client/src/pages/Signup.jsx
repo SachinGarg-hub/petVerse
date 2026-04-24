@@ -236,7 +236,7 @@ const Signup = () => {
               Sign in
             </Link>
           </p>
-        </div>
+        </motion.div>
       </motion.div>
     </div>
   );

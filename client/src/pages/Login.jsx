@@ -205,7 +205,7 @@ const Login = () => {
               Create account
             </Link>
           </p>
-        </div>
+        </motion.div>
       </motion.div>
     </div>
   );
