@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getAdoptionById, createConversation } from '../api';
+import { getAdoptionById, createConversation, markAdopted } from '../api';
 import { useAuth } from '../context/AuthContext';
 import { HiOutlineLocationMarker, HiOutlineMail, HiOutlinePhone, HiChevronLeft } from 'react-icons/hi';
 import { MdOutlinePets, MdFormatQuote } from 'react-icons/md';
@@ -12,6 +12,7 @@ const AdoptionDetail = () => {
   const { user: currentUser } = useAuth();
   const [pet, setPet] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isAdopting, setIsAdopting] = useState(false);
 
   useEffect(() => {
     const fetchPet = async () => {
@@ -26,6 +27,19 @@ const AdoptionDetail = () => {
     };
     fetchPet();
   }, [id]);
+
+  const handleMarkAdopted = async () => {
+    if (!pet || pet.isAdopted) return;
+    setIsAdopting(true);
+    try {
+      const res = await markAdopted(id);
+      setPet(res.data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsAdopting(false);
+    }
+  };
 
   const handleContactOwner = async () => {
     if (!pet) return;
@@ -162,17 +176,33 @@ const AdoptionDetail = () => {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
-               {currentUser?._id !== pet.user._id && !pet.isAdopted && (
+               {currentUser?._id === pet.user._id ? (
                  <button 
-                  onClick={handleContactOwner}
-                  className="btn-primary flex-1 py-4 text-center text-base"
+                  onClick={handleMarkAdopted}
+                  disabled={pet.isAdopted || isAdopting}
+                  className={`btn-primary flex-1 py-4 text-center text-base ${pet.isAdopted ? 'opacity-50 grayscale cursor-not-allowed' : ''}`}
                  >
-                   Chat with Owner
+                   {isAdopting ? 'Updating...' : pet.isAdopted ? 'Marked as Adopted 💖' : 'Mark as Adopted'}
                  </button>
+               ) : (
+                 <>
+                  {!pet.isAdopted && (
+                    <button 
+                      onClick={handleContactOwner}
+                      className="btn-primary flex-1 py-4 text-center text-base"
+                    >
+                      Chat with Owner
+                    </button>
+                  )}
+                  <button 
+                    onClick={handleContactOwner}
+                    disabled={pet.isAdopted}
+                    className={`btn-outline flex-1 py-4 text-center text-base ${pet.isAdopted ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  >
+                    {pet.isAdopted ? 'Adopted' : `Request Adoption 🏠`}
+                  </button>
+                 </>
                )}
-               <button className="btn-outline flex-1 py-4 text-center text-base">
-                 Adopt {pet.petName}
-               </button>
             </div>
           </div>
         </div>

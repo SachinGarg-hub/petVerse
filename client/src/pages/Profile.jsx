@@ -5,6 +5,8 @@ import { useAuth } from '../context/AuthContext';
 import { HiOutlineUserAdd, HiOutlineMail, HiOutlineCheckCircle, HiOutlineViewGrid, HiOutlineBookmark } from 'react-icons/hi';
 import { useNavigate } from 'react-router-dom';
 import EditProfileModal from '../components/EditProfileModal';
+import UserListModal from '../components/UserListModal';
+import PostDetailModal from '../components/PostDetailModal';
 
 const Profile = () => {
   const { id } = useParams();
@@ -16,6 +18,11 @@ const Profile = () => {
   const [tab, setTab] = useState('posts');
   const [isFollowing, setIsFollowing] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isUserListModalOpen, setIsUserListModalOpen] = useState(false);
+  const [modalTitle, setModalTitle] = useState('');
+  const [modalUsers, setModalUsers] = useState([]);
+  const [isPostModalOpen, setIsPostModalOpen] = useState(false);
+  const [selectedPost, setSelectedPost] = useState(null);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -137,14 +144,28 @@ const Profile = () => {
                 <span className="block text-xl font-extrabold text-gray-800 dark:text-white uppercase tracking-tighter">{posts.length}</span>
                 <span className="text-xs text-gray-400 font-bold uppercase tracking-widest">Posts</span>
               </div>
-              <div className="text-center md:text-left">
+              <button 
+                onClick={() => {
+                  setModalTitle('Followers');
+                  setModalUsers(user?.followers || []);
+                  setIsUserListModalOpen(true);
+                }}
+                className="text-center md:text-left hover:scale-105 transition-transform"
+              >
                 <span className="block text-xl font-extrabold text-gray-800 dark:text-white uppercase tracking-tighter">{user?.followers.length}</span>
                 <span className="text-xs text-gray-400 font-bold uppercase tracking-widest">Followers</span>
-              </div>
-              <div className="text-center md:text-left">
+              </button>
+              <button 
+                onClick={() => {
+                  setModalTitle('Following');
+                  setModalUsers(user?.following || []);
+                  setIsUserListModalOpen(true);
+                }}
+                className="text-center md:text-left hover:scale-105 transition-transform"
+              >
                 <span className="block text-xl font-extrabold text-gray-800 dark:text-white uppercase tracking-tighter">{user?.following.length}</span>
                 <span className="text-xs text-gray-400 font-bold uppercase tracking-widest">Following</span>
-              </div>
+              </button>
             </div>
 
             <p className="text-gray-600 dark:text-gray-300 font-medium max-w-md">
@@ -178,7 +199,14 @@ const Profile = () => {
           <>
             {posts.length > 0 ? (
               posts.map(post => (
-                <div key={post._id} className="group relative aspect-square rounded-2xl md:rounded-3xl overflow-hidden cursor-pointer">
+                <div 
+                  key={post._id} 
+                  onClick={() => {
+                    setSelectedPost(post);
+                    setIsPostModalOpen(true);
+                  }}
+                  className="group relative aspect-square rounded-2xl md:rounded-3xl overflow-hidden cursor-pointer"
+                >
                   <img src={post.mediaUrl} className="w-full h-full object-cover transition-transform group-hover:scale-110" alt="post" />
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white font-bold gap-6">
                      <span className="flex items-center gap-1 text-lg">❤️ {post.likes.length}</span>
@@ -206,6 +234,22 @@ const Profile = () => {
         onClose={() => setIsEditModalOpen(false)}
         user={user}
         onUpdate={(updatedUser) => setUser(updatedUser)}
+      />
+
+      <UserListModal 
+        isOpen={isUserListModalOpen}
+        onClose={() => setIsUserListModalOpen(false)}
+        title={modalTitle}
+        users={modalUsers}
+      />
+
+      <PostDetailModal 
+        isOpen={isPostModalOpen}
+        onClose={() => setIsPostModalOpen(false)}
+        post={selectedPost}
+        onUpdate={(updatedPost) => {
+          setPosts(posts.map(p => p._id === updatedPost._id ? updatedPost : p));
+        }}
       />
     </div>
   );

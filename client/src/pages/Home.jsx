@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
-import { getPosts, getSuggestedUsers, followUser } from '../api';
+import { getPosts, getSuggestedUsers, followUser, getStories } from '../api';
 import PostCard from '../components/PostCard';
 import CreatePostModal from '../components/CreatePostModal';
+import StoryBar from '../components/StoryBar';
+import StoryViewer from '../components/StoryViewer';
 import { HiPlus, HiSparkles } from 'react-icons/hi2';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -9,22 +11,34 @@ import { useAuth } from '../context/AuthContext';
 const Home = () => {
   const { user } = useAuth();
   const [posts, setPosts] = useState([]);
+  const [stories, setStories] = useState([]);
   const [suggested, setSuggested] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedStoryGroup, setSelectedStoryGroup] = useState(null);
+  const [isStoryViewerOpen, setIsStoryViewerOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [feedType, setFeedType] = useState('for-you');
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
 
-  const fetchPosts = async (p = 1, type = feedType) => {
+  const fetchData = async (p = 1, type = feedType) => {
+    if (p === 1) setLoading(true);
     try {
-      const res = await getPosts(p, type === 'following' ? 'following' : '');
+      const [postsRes, suggestedRes, storiesRes] = await Promise.all([
+        getPosts(p, type === 'following' ? 'following' : ''),
+        getSuggestedUsers(),
+        getStories()
+      ]);
+
       if (p === 1) {
-        setPosts(res.data.posts);
+        setPosts(postsRes.data.posts);
       } else {
-        setPosts([...posts, ...res.data.posts]);
+        setPosts(prev => [...prev, ...postsRes.data.posts]);
       }
-      setHasMore(res.data.hasMore);
+      
+      setSuggested(suggestedRes.data);
+      setStories(storiesRes.data);
+      setHasMore(postsRes.data.hasMore);
     } catch (err) {
       console.error(err);
     } finally {
@@ -32,19 +46,18 @@ const Home = () => {
     }
   };
 
-  const fetchSuggested = async () => {
+  useEffect(() => {
+    fetchData(1, feedType);
+  }, [feedType]);
+
+  const handleRefreshStories = async () => {
     try {
-      const res = await getSuggestedUsers();
-      setSuggested(res.data);
+      const res = await getStories();
+      setStories(res.data);
     } catch (err) {
       console.error(err);
     }
   };
-
-  useEffect(() => {
-    fetchPosts(1, feedType);
-    if (suggested.length === 0) fetchSuggested();
-  }, [feedType]);
 
   const handleUpdatePost = (updatedPost) => {
     setPosts(posts.map(p => p._id === updatedPost._id ? updatedPost : p));
@@ -53,9 +66,25 @@ const Home = () => {
   const handleFollow = async (id) => {
     try {
       await followUser(id);
-      fetchSuggested(); // Refresh suggestions
+      fetchData(1, feedType); // Refresh everything
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  const handleNextUser = () => {
+    const currentIndex = stories.findIndex(s => s.user._id === selectedStoryGroup.user._id);
+    if (currentIndex < stories.length - 1) {
+      setSelectedStoryGroup(stories[currentIndex + 1]);
+    } else {
+      setIsStoryViewerOpen(false);
+    }
+  };
+
+  const handlePrevUser = () => {
+    const currentIndex = stories.findIndex(s => s.user._id === selectedStoryGroup.user._id);
+    if (currentIndex > 0) {
+      setSelectedStoryGroup(stories[currentIndex - 1]);
     }
   };
 
@@ -63,6 +92,19 @@ const Home = () => {
     <div className="flex flex-col lg:flex-row gap-8">
       {/* Main Feed */}
       <div className="flex-1 max-w-2xl mx-auto w-full">
+        
+        {/* Story Bar */}
+        <div className="mb-8">
+           <StoryBar 
+              stories={stories} 
+              onRefresh={handleRefreshStories}
+              onOpenStory={(group) => {
+                setSelectedStoryGroup(group);
+                setIsStoryViewerOpen(true);
+              }}
+           />
+        </div>
+
         {/* Create Post Header */}
         <div className="card p-4 mb-8 flex items-center gap-4 animate-fade-in">
           {user?.profilePic ? (
@@ -89,13 +131,13 @@ const Home = () => {
         {/* Feed Tabs */}
         <div className="flex justify-center mb-6 border-b border-gray-100 dark:border-white/5">
           <button 
-            onClick={() => { setFeedType('for-you'); setPage(1); setLoading(true); setPosts([]); }}
+            onClick={() => { setFeedType('for-you'); setPage(1); }}
             className={`px-8 py-4 flex flex-col items-center gap-1 font-bold text-sm transition-all border-b-2 ${feedType === 'for-you' ? 'border-petverse-purple text-petverse-purple' : 'border-transparent text-gray-400'}`}
           >
             FOR YOU
           </button>
           <button 
-            onClick={() => { setFeedType('following'); setPage(1); setLoading(true); setPosts([]); }}
+            onClick={() => { setFeedType('following'); setPage(1); }}
             className={`px-8 py-4 flex flex-col items-center gap-1 font-bold text-sm transition-all border-b-2 ${feedType === 'following' ? 'border-petverse-purple text-petverse-purple' : 'border-transparent text-gray-400'}`}
           >
             FOLLOWING
@@ -103,7 +145,7 @@ const Home = () => {
         </div>
 
         {/* Posts List */}
-        {loading ? (
+        {loading && page === 1 ? (
           <div className="space-y-6">
             {[1, 2, 3].map(i => (
               <div key={i} className="card h-[500px] animate-pulse-slow p-4 flex flex-col gap-4">
@@ -139,7 +181,7 @@ const Home = () => {
                 onClick={() => {
                   const nextPage = page + 1;
                   setPage(nextPage);
-                  fetchPosts(nextPage);
+                  fetchData(nextPage);
                 }}
                 className="w-full py-4 text-petverse-purple font-bold hover:underline"
               >
@@ -162,16 +204,14 @@ const Home = () => {
             {suggested.map(item => (
               <div key={item._id} className="flex items-center justify-between gap-3">
                 <Link to={`/profile/${item._id}`} className="flex items-center gap-3">
-                  {item.profilePic ? (
-                    <img src={item.profilePic} alt={item.username} className="w-10 h-10 rounded-full object-cover" />
-                  ) : (
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-purple-400 to-pink-400 flex items-center justify-center text-white font-bold text-xs">
-                      {item.username.charAt(0).toUpperCase()}
-                    </div>
-                  )}
+                  <img 
+                    src={item.profilePic || `https://api.dicebear.com/7.x/avataaars/svg?seed=${item.username}`} 
+                    className="w-10 h-10 rounded-full object-cover" 
+                    alt={item.username} 
+                  />
                   <div className="text-sm">
                     <p className="font-bold text-gray-800 dark:text-white leading-none">{item.username}</p>
-                    <p className="text-gray-400 truncate w-32">New to PetVerse</p>
+                    <p className="text-gray-400 truncate w-32 text-xs">Pet lover 🐾</p>
                   </div>
                 </Link>
                 <button 
@@ -183,25 +223,21 @@ const Home = () => {
               </div>
             ))}
           </div>
-
-          <div className="mt-8 pt-6 border-t border-gray-100 dark:border-white/5">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-12 h-12 rounded-full gradient-primary flex items-center justify-center text-white shadow-glow">
-                <HiSparkles size={24} />
-              </div>
-              <div className="text-sm">
-                <p className="font-bold dark:text-white">Premium Ads</p>
-                <p className="text-gray-400">Support PetVerse</p>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
 
       <CreatePostModal 
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
-        onRefresh={() => fetchPosts(1)} 
+        onRefresh={() => fetchData(1)} 
+      />
+
+      <StoryViewer 
+        isOpen={isStoryViewerOpen}
+        onClose={() => setIsStoryViewerOpen(false)}
+        storyGroup={selectedStoryGroup}
+        onNextUser={handleNextUser}
+        onPrevUser={handlePrevUser}
       />
     </div>
   );

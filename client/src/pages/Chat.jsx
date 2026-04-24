@@ -1,35 +1,45 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { getConversations, getMessages, sendMessage as sendMessageApi } from '../api';
-import { io } from 'socket.io-client';
 import { HiPaperAirplane, HiOutlineChatAlt, HiOutlinePaperClip, HiOutlineMicrophone } from 'react-icons/hi';
 import { format } from 'date-fns';
 
 const Chat = () => {
-  const { user } = useAuth();
+  const { user, socket } = useAuth();
   const [conversations, setConversations] = useState([]);
   const [currentChat, setCurrentChat] = useState(null);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [onlineUsers, setOnlineUsers] = useState([]);
-  const [isTyping, setIsTyping] = useState(false);
-  const socket = useRef();
   const scrollRef = useRef();
 
   useEffect(() => {
-    socket.current = io(import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000');
-    socket.current.emit('addUser', user?._id);
-    socket.current.on('getOnlineUsers', (users) => {
+    if (!socket) return;
+
+    socket.on('getOnlineUsers', (users) => {
       setOnlineUsers(users);
     });
-    socket.current.on('getMessage', (data) => {
-      if (currentChat?.members.some(m => m._id === data.senderId)) {
-        setMessages((prev) => [...prev, { ...data, sender: { _id: data.senderId } }]);
+
+    socket.on('getMessage', (data) => {
+      // Check if message belongs to current open chat
+      if (currentChat?._id === data.conversationId || currentChat?.members.some(m => m._id === data.senderId)) {
+         setMessages((prev) => [...prev, { ...data, sender: { _id: data.senderId } }]);
       }
+      
+      // Update last message in conversation list
+      setConversations(prev => prev.map(c => {
+         if (c._id === data.conversationId) {
+            return { ...c, lastMessage: data.text };
+         }
+         return c;
+      }));
     });
     
-    return () => socket.current.disconnect();
-  }, [user?._id, currentChat]);
+    return () => {
+      socket.off('getOnlineUsers');
+      socket.off('getMessage');
+    };
+  }, [socket, currentChat]);
 
   useEffect(() => {
     const fetchConversations = async () => {
@@ -63,29 +73,45 @@ const Chat = () => {
 
   const handleSend = async (e) => {
     e.preventDefault();
-    if (!newMessage.trim()) return;
+    if (!newMessage.trim() || !currentChat) return;
 
-    const receiverId = currentChat.members.find(m => m._id !== user._id)._id;
-    
-    socket.current.emit('sendMessage', {
+    const otherMember = getOtherMember(currentChat.members);
+    if (!otherMember) return;
+
+    const messageData = {
       senderId: user._id,
-      receiverId,
+      receiverId: otherMember._id,
       text: newMessage,
-    });
+      conversationId: currentChat._id,
+      createdAt: new Date().toISOString()
+    };
+
+    // Emit via socket
+    socket.emit('sendMessage', messageData);
+
+    // Optimistic update
+    setMessages(prev => [...prev, { ...messageData, sender: { _id: user._id } }]);
+    setNewMessage('');
 
     try {
-      const res = await sendMessageApi({
+      await sendMessageApi({
         conversationId: currentChat._id,
         text: newMessage,
       });
-      setMessages([...messages, res.data]);
-      setNewMessage('');
+      
+      // Update conversations list with last message
+      setConversations(prev => prev.map(c => {
+        if (c._id === currentChat._id) {
+           return { ...c, lastMessage: newMessage };
+        }
+        return c;
+      }));
     } catch (err) {
       console.error(err);
     }
   };
 
-  const getOtherMember = (members) => members.find(m => m._id !== user._id);
+  const getOtherMember = (members) => members?.find(m => m._id !== user?._id);
 
   return (
     <div className="h-[calc(100vh-160px)] flex gap-6 animate-fade-in">
@@ -119,7 +145,9 @@ const Chat = () => {
                 <div className="flex-1 min-w-0">
                   <div className="flex justify-between items-baseline mb-1">
                     <p className="font-bold text-gray-800 dark:text-white truncate">{other?.username}</p>
-                    <span className="text-[10px] text-gray-400">12:45 PM</span>
+                    <span className="text-[10px] text-gray-400">
+                       {c.updatedAt ? format(new Date(c.updatedAt), 'h:mm a') : ''}
+                    </span>
                   </div>
                   <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{c.lastMessage || 'Start a conversation'}</p>
                 </div>
@@ -137,13 +165,15 @@ const Chat = () => {
             <div className="p-4 border-b border-gray-100 dark:border-white/5 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <img 
-                  src={getOtherMember(currentChat.members).profilePic || `https://api.dicebear.com/7.x/avataaars/svg?seed=${getOtherMember(currentChat.members).username}`} 
+                  src={getOtherMember(currentChat.members)?.profilePic || `https://api.dicebear.com/7.x/avataaars/svg?seed=${getOtherMember(currentChat.members)?.username}`} 
                   className="w-10 h-10 rounded-full object-cover" 
                   alt="avatar" 
                 />
                 <div>
-                  <p className="font-bold text-gray-800 dark:text-white leading-none">{getOtherMember(currentChat.members).username}</p>
-                  <p className="text-xs text-green-500 mt-1 font-medium">{onlineUsers.includes(getOtherMember(currentChat.members)._id) ? 'Online' : 'Offline'}</p>
+                  <p className="font-bold text-gray-800 dark:text-white leading-none">{getOtherMember(currentChat.members)?.username}</p>
+                  <p className="text-xs text-green-500 mt-1 font-medium">
+                    {onlineUsers.includes(getOtherMember(currentChat.members)?._id) ? 'Online' : 'Offline'}
+                  </p>
                 </div>
               </div>
             </div>
@@ -157,7 +187,7 @@ const Chat = () => {
                     <div className={`max-w-[70%] p-4 rounded-3xl text-sm ${isMe ? 'bg-petverse-purple text-white rounded-tr-none shadow-glow' : 'bg-gray-100 dark:bg-white/5 text-gray-800 dark:text-gray-200 rounded-tl-none'}`}>
                       {m.text}
                       <p className={`text-[10px] mt-1 ${isMe ? 'text-white/70' : 'text-gray-400'}`}>
-                        {format(new Date(m.createdAt), 'h:mm a')}
+                        {m.createdAt ? format(new Date(m.createdAt), 'h:mm a') : ''}
                       </p>
                     </div>
                   </div>

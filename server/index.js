@@ -21,6 +21,7 @@ const userRoutes = require('./routes/users');
 const messageRoutes = require('./routes/messages');
 const uploadRoutes = require('./routes/upload');
 const notificationRoutes = require('./routes/notifications');
+const storyRoutes = require('./routes/story');
 
 const app = express();
 const server = http.createServer(app);
@@ -30,6 +31,9 @@ const io = new Server(server, {
     methods: ['GET', 'POST'],
   },
 });
+
+// Socket.io for real-time chat
+const onlineUsers = new Map();
 
 app.set('socketio', io);
 app.set('onlineUsers', onlineUsers);
@@ -47,9 +51,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/notifications', notificationRoutes);
-
-// Socket.io for real-time chat
-const onlineUsers = new Map();
+app.use('/api/stories', storyRoutes);
 
 io.on('connection', (socket) => {
   console.log('User connected:', socket.id);

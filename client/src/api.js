@@ -39,6 +39,7 @@ export const commentOnPost = (id, text) => API.post(`/posts/${id}/comment`, { te
 export const deletePost = (id) => API.delete(`/posts/${id}`);
 export const savePost = (id) => API.put(`/posts/${id}/save`);
 export const getUserPosts = (userId) => API.get(`/posts/user/${userId}`);
+export const getLikers = (id) => API.get(`/posts/${id}/likers`);
 
 // Reels
 export const getReels = (page = 1) => API.get(`/reels?page=${page}&limit=5`);
@@ -74,5 +75,10 @@ export const getMessages = (conversationId) => API.get(`/messages/${conversation
 export const getNotifications = () => API.get('/notifications');
 export const markNotificationRead = (id) => API.put(`/notifications/${id}/read`);
 export const markAllNotificationsRead = () => API.put('/notifications/read-all');
+
+// Stories
+export const getStories = () => API.get('/stories/following');
+export const createStory = (data) => API.post('/stories', data);
+export const viewStory = (id) => API.put(`/stories/${id}/view`);
 
 export default API;

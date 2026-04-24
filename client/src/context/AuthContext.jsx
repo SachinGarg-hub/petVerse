@@ -28,19 +28,19 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
-  const socket = useRef();
+  const [socket, setSocket] = useState(null);
 
   useEffect(() => {
     if (user) {
-      socket.current = io(import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000');
-      socket.current.emit('addUser', user._id);
-    }
+      const newSocket = io(import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000');
+      newSocket.emit('addUser', user._id);
+      setSocket(newSocket);
 
-    return () => {
-      if (socket.current) {
-        socket.current.disconnect();
-      }
-    };
+      return () => {
+        newSocket.disconnect();
+        setSocket(null);
+      };
+    }
   }, [user]);
 
   useEffect(() => {

@@ -9,8 +9,9 @@ import {
   HiEllipsisHorizontal
 } from 'react-icons/hi2';
 import { useAuth } from '../context/AuthContext';
-import { likePost, commentOnPost, savePost } from '../api';
+import { likePost, commentOnPost, savePost, getLikers } from '../api';
 import { formatDistanceToNow } from 'date-fns';
+import UserListModal from './UserListModal';
 
 const PostCard = ({ post, onUpdate }) => {
   const { user } = useAuth();
@@ -20,6 +21,22 @@ const PostCard = ({ post, onUpdate }) => {
   const [commentText, setCommentText] = useState('');
   const [isSaved, setIsSaved] = useState(user?.savedPosts?.includes(post._id));
   const [likeAnimation, setLikeAnimation] = useState(false);
+  const [isLikersModalOpen, setIsLikersModalOpen] = useState(false);
+  const [likers, setLikers] = useState([]);
+  const [loadingLikers, setLoadingLikers] = useState(false);
+
+  const fetchLikers = async () => {
+    setIsLikersModalOpen(true);
+    setLoadingLikers(true);
+    try {
+      const res = await getLikers(post._id);
+      setLikers(res.data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoadingLikers(false);
+    }
+  };
 
   const handleLike = async () => {
     try {
@@ -117,7 +134,12 @@ const PostCard = ({ post, onUpdate }) => {
         </div>
 
         <div className="flex flex-col gap-1">
-          <p className="font-bold text-gray-800 dark:text-white">{likesCount} likes</p>
+          <button 
+            onClick={fetchLikers}
+            className="font-bold text-gray-800 dark:text-white text-left hover:underline cursor-pointer"
+          >
+            {likesCount} likes
+          </button>
           <div className="text-gray-800 dark:text-gray-200">
             <span className="font-bold mr-2">{post.user.username}</span>
             {post.caption}
@@ -162,6 +184,14 @@ const PostCard = ({ post, onUpdate }) => {
           </button>
         </form>
       </div>
+      
+      <UserListModal 
+        isOpen={isLikersModalOpen}
+        onClose={() => setIsLikersModalOpen(false)}
+        title="Likes"
+        users={likers}
+        loading={loadingLikers}
+      />
     </div>
   );
 };

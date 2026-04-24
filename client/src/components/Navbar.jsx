@@ -43,20 +43,18 @@ const Navbar = () => {
   }, [user]);
 
   useEffect(() => {
-    if (socket?.current) {
-      socket.current.on('newNotification', (notif) => {
+    if (socket) {
+      socket.on('newNotification', (notif) => {
         setNotifications(prev => [notif, ...prev]);
         setUnreadCount(prev => prev + 1);
-        
-        // Optional: show a toast or browser notification here
       });
     }
     return () => {
-      if (socket?.current) {
-        socket.current.off('newNotification');
+      if (socket) {
+        socket.off('newNotification');
       }
     };
-  }, [socket, socket?.current]);
+  }, [socket]);
 
   const handleMarkAllRead = async () => {
     try {

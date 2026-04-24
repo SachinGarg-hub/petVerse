@@ -8,9 +8,8 @@ import Reels from './pages/Reels';
 import Adoption from './pages/Adoption';
 import Profile from './pages/Profile';
 import Messages from './pages/Messages';
-import Explore from './pages/Explore';
-import SocialAuth from './pages/SocialAuth';
 import AdoptionDetail from './pages/AdoptionDetail';
+import Settings from './pages/Settings';
 import { AnimatePresence } from 'framer-motion';
 import { useLocation } from 'react-router-dom';
 
@@ -52,6 +51,7 @@ function AppContent() {
           <Route path="profile/:id" element={<Profile />} />
           <Route path="messages" element={<Messages />} />
           <Route path="explore" element={<Explore />} />
+          <Route path="settings" element={<Settings />} />
         </Route>
       </Routes>
     </AnimatePresence>

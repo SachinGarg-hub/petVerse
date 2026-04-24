@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { getReels, likeReel, commentOnReel, addView } from '../api';
+import { getReels, likeReel, addView } from '../api';
 import { HiHeart, HiChatBubbleOvalLeft, HiShare, HiSpeakerWave, HiSpeakerXMark, HiPlus } from 'react-icons/hi2';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -35,7 +35,7 @@ const ReelCard = ({ reel, isActive }) => {
   };
 
   return (
-    <div className="reel-item h-[calc(100vh-120px)] md:h-[calc(100vh-160px)] w-full max-w-[400px] mx-auto relative rounded-4xl overflow-hidden bg-black shadow-2xl">
+    <div className="snap-start relative h-screen md:h-[calc(100vh-80px)] w-full md:max-w-[400px] md:mx-auto md:rounded-3xl overflow-hidden bg-black shadow-2xl">
       <video
         ref={videoRef}
         src={reel.videoUrl}
@@ -47,43 +47,51 @@ const ReelCard = ({ reel, isActive }) => {
       />
 
       {/* Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent pointer-events-none" />
 
       {/* Buttons Overlay */}
-      <div className="absolute right-4 bottom-20 flex flex-col gap-6 items-center z-10">
+      <div className="absolute right-4 bottom-24 flex flex-col gap-6 items-center z-10">
         <div className="flex flex-col items-center">
-          <button onClick={handleLike} className={`p-3 rounded-full glass backdrop-blur-md transition-transform active:scale-150 ${isLiked ? 'text-red-500' : 'text-white'}`}>
-            <HiHeart size={30} />
+          <button onClick={handleLike} className={`p-3 rounded-full bg-black/20 backdrop-blur-md transition-transform active:scale-150 ${isLiked ? 'text-red-500' : 'text-white'}`}>
+            <HiHeart size={28} />
           </button>
-          <span className="text-white text-xs font-bold mt-1">{likesCount}</span>
+          <span className="text-white text-xs font-black mt-1 shadow-sm">{likesCount}</span>
         </div>
         
         <div className="flex flex-col items-center">
-          <button className="p-3 rounded-full glass backdrop-blur-md text-white">
-            <HiChatBubbleOvalLeft size={30} />
+          <button className="p-3 rounded-full bg-black/20 backdrop-blur-md text-white">
+            <HiChatBubbleOvalLeft size={28} />
           </button>
-          <span className="text-white text-xs font-bold mt-1">{reel.comments.length}</span>
+          <span className="text-white text-xs font-black mt-1 shadow-sm">{reel.comments.length}</span>
         </div>
 
-        <button className="p-3 rounded-full glass backdrop-blur-md text-white">
-          <HiShare size={30} />
+        <button className="p-3 rounded-full bg-black/20 backdrop-blur-md text-white">
+          <HiShare size={28} />
         </button>
 
-        <button onClick={() => setMuted(!muted)} className="p-3 rounded-full glass backdrop-blur-md text-white">
-          {muted ? <HiSpeakerXMark size={30} /> : <HiSpeakerWave size={30} />}
+        <button onClick={() => setMuted(!muted)} className="p-3 rounded-full bg-black/20 backdrop-blur-md text-white">
+          {muted ? <HiSpeakerXMark size={28} /> : <HiSpeakerWave size={28} />}
         </button>
       </div>
 
       {/* Content Overlay */}
-      <div className="absolute bottom-6 left-6 right-16 text-white z-10 pointer-events-none">
-        <div className="flex items-center gap-3 mb-3 pointer-events-auto">
-          <Link to={`/profile/${reel.user._id}`} className="flex items-center gap-2">
-            <img src={reel.user.profilePic || `https://api.dicebear.com/7.x/avataaars/svg?seed=${reel.user.username}`} alt="avatar" className="w-10 h-10 rounded-full border-2 border-white" />
-            <span className="font-bold">{reel.user.username}</span>
+      <div className="absolute bottom-10 left-6 right-16 text-white z-10">
+        <div className="flex items-center gap-3 mb-3">
+          <Link to={`/profile/${reel.user._id}`} className="flex items-center gap-2 group">
+            <img 
+              src={reel.user.profilePic || `https://api.dicebear.com/7.x/avataaars/svg?seed=${reel.user.username}`} 
+              alt="avatar" 
+              className="w-10 h-10 rounded-full border-2 border-white group-hover:scale-110 transition-transform" 
+            />
+            <span className="font-bold text-lg drop-shadow-md">{reel.user.username}</span>
           </Link>
-          <button className="px-4 py-1.5 rounded-full border border-white text-xs font-bold hover:bg-white hover:text-black transition-all">Follow</button>
+          <button className="px-4 py-1 rounded-full border border-white/50 bg-white/10 backdrop-blur-sm text-xs font-black uppercase tracking-widest hover:bg-white hover:text-black transition-all">
+            Follow
+          </button>
         </div>
-        <p className="text-sm line-clamp-2 leading-relaxed">{reel.caption}</p>
+        <p className="text-sm font-medium leading-relaxed line-clamp-2 drop-shadow-sm max-w-[85%]">
+          {reel.caption}
+        </p>
       </div>
     </div>
   );
@@ -120,24 +128,25 @@ const Reels = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto flex flex-col items-center">
-      <div className="flex items-center justify-between w-full max-w-[400px] mb-6">
-        <h2 className="text-2xl font-extrabold gradient-text font-display">Reels</h2>
+    <div className="h-screen md:h-[calc(100vh-40px)] w-full flex flex-col items-center">
+      {/* Mobile Top Bar */}
+      <div className="md:hidden fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-4 bg-gradient-to-b from-black/50 to-transparent">
+        <h2 className="text-2xl font-black text-white italic tracking-tighter">Reels</h2>
         <button 
           onClick={() => setIsModalOpen(true)}
-          className="w-10 h-10 rounded-full glass border border-petverse-purple flex items-center justify-center text-petverse-purple hover:bg-petverse-purple hover:text-white transition-all shadow-glow hover:scale-110 active:scale-95"
+          className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white"
         >
           <HiPlus size={24} />
         </button>
       </div>
 
       {loading ? (
-        <div className="h-[calc(100vh-160px)] w-full max-w-[400px] bg-gray-200 dark:bg-white/5 rounded-4xl animate-pulse-slow" />
+        <div className="h-full w-full max-w-[400px] bg-gray-900 md:rounded-3xl animate-pulse" />
       ) : (
         <div 
           ref={containerRef}
           onScroll={handleScroll}
-          className="reel-container h-[calc(100vh-120px)] md:h-[calc(100vh-160px)] w-full overflow-y-scroll hide-scrollbar space-y-4"
+          className="h-full w-full overflow-y-scroll snap-y snap-mandatory hide-scrollbar md:pb-10"
         >
           {reels.map((reel, idx) => (
             <ReelCard key={reel._id} reel={reel} isActive={idx === activeIndex} />
@@ -152,6 +161,14 @@ const Reels = () => {
           )}
         </div>
       )}
+
+      {/* Desktop Create Button */}
+      <button 
+        onClick={() => setIsModalOpen(true)}
+        className="hidden md:flex fixed right-10 bottom-10 w-14 h-14 rounded-full gradient-primary items-center justify-center text-white shadow-glow hover:scale-110 active:scale-95 transition-all z-50"
+      >
+        <HiPlus size={28} />
+      </button>
 
       <CreateReelModal 
         isOpen={isModalOpen} 
