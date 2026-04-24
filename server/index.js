@@ -27,7 +27,7 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+    origin: '*',
     methods: ['GET', 'POST'],
   },
 });
@@ -39,7 +39,11 @@ app.set('socketio', io);
 app.set('onlineUsers', onlineUsers);
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: '*', // Allow all origins for easier deployment
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json({ limit: '50mb' }));
 
 // Routes

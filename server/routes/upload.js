@@ -16,6 +16,14 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+// Middleware to check credentials before upload
+const checkCloudinary = (req, res, next) => {
+  if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
+    return res.status(500).json({ message: 'Cloudinary credentials missing on server. Please check environment variables.' });
+  }
+  next();
+};
+
 // Configure Storage
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
@@ -32,7 +40,7 @@ const storage = new CloudinaryStorage({
 const upload = multer({ storage: storage });
 
 // Route to handle single file upload
-router.post('/', auth, (req, res) => {
+router.post('/', auth, checkCloudinary, (req, res) => {
   upload.single('file')(req, res, (err) => {
     if (err) {
       console.error('❌  Upload Middleware Error:', err);

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'; // Sidebar refactor v2
+import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { 
@@ -18,6 +18,8 @@ import {
 import { MdOutlinePets, MdPets } from 'react-icons/md';
 import { motion, AnimatePresence } from 'framer-motion';
 import CreatePostModal from './CreatePostModal';
+import CreateStoryModal from './CreateStoryModal';
+import CreateOptionsModal from './CreateOptionsModal';
 import SearchPanel from './SearchPanel';
 import ActivityPanel from './ActivityPanel';
 import { getNotifications, markAllNotificationsRead } from '../api';
@@ -26,7 +28,9 @@ const Sidebar = () => {
   const { user, toggleDark, darkMode, logout, socket } = useAuth();
   const location = useLocation();
   const [showMore, setShowMore] = useState(false);
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isCreateOptionsOpen, setIsCreateOptionsOpen] = useState(false);
+  const [isCreatePostOpen, setIsCreatePostOpen] = useState(false);
+  const [isCreateStoryOpen, setIsCreateStoryOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isActivityOpen, setIsActivityOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
@@ -88,7 +92,7 @@ const Sidebar = () => {
       badge: unreadCount,
       active: isActivityOpen
     },
-    { name: 'Create', onClick: () => setIsCreateModalOpen(true), icon: HiOutlinePlusCircle, activeIcon: HiPlusCircleActive },
+    { name: 'Create', onClick: () => setIsCreateOptionsOpen(true), icon: HiOutlinePlusCircle, activeIcon: HiPlusCircleActive },
     { name: 'Profile', path: `/profile/${user?._id}`, icon: HiOutlineUser, activeIcon: HiUserActive },
   ];
 
@@ -218,7 +222,7 @@ const Sidebar = () => {
         })}
         {/* Mobile Create Button in middle */}
         <button 
-          onClick={() => setIsCreateModalOpen(true)}
+          onClick={() => setIsCreateOptionsOpen(true)}
           className="w-12 h-12 gradient-primary rounded-2xl flex items-center justify-center text-white shadow-glow -translate-y-4 border-4 border-white dark:border-petverse-dark"
         >
           <HiPlusCircle size={24} />
@@ -232,10 +236,24 @@ const Sidebar = () => {
         </Link>
       </nav>
 
+      {/* Modals */}
+      <CreateOptionsModal 
+        isOpen={isCreateOptionsOpen} 
+        onClose={() => setIsCreateOptionsOpen(false)}
+        onSelectPost={() => setIsCreatePostOpen(true)}
+        onSelectStory={() => setIsCreateStoryOpen(true)}
+      />
+
       <CreatePostModal 
-        isOpen={isCreateModalOpen} 
-        onClose={() => setIsCreateModalOpen(false)} 
+        isOpen={isCreatePostOpen} 
+        onClose={() => setIsCreatePostOpen(false)} 
         onRefresh={() => window.location.reload()} 
+      />
+
+      <CreateStoryModal 
+        isOpen={isCreateStoryOpen}
+        onClose={() => setIsCreateStoryOpen(false)}
+        onRefresh={() => window.location.reload()}
       />
     </>
   );
