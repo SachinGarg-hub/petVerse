@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const Post = require('../models/Post');
 const createNotification = require('../utils/notification');
 
 exports.createPost = async (req, res) => {
