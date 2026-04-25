@@ -60,7 +60,8 @@ app.get('/health', (req, res) => {
     status: 'PetVerse Server is ALIVE 🐾',
     cloudinary: process.env.CLOUDINARY_CLOUD_NAME ? '✅' : '❌',
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME || 'Not Set',
-    mongo: mongoose.connection.readyState === 1 ? '✅' : '❌'
+    mongo: mongoose.connection.readyState === 1 ? '✅' : '❌',
+    post_model: typeof require('./models/Post') !== 'undefined' ? '✅' : '❌'
   });
 });
 
