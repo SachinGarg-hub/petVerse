@@ -23,11 +23,18 @@ const uploadRoutes = require('./routes/upload');
 const notificationRoutes = require('./routes/notifications');
 const storyRoutes = require('./routes/story');
 
+const allowedOrigins = [
+  'http://localhost:5173',
+  'https://pet-verse-seven.vercel.app',
+  'https://pet-verse-seven-sachins-projects-795be7f9.vercel.app', // Vercel preview
+  'https://petverse-client.vercel.app'
+];
+
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: true,
+    origin: allowedOrigins,
     methods: ['GET', 'POST'],
     credentials: true
   },
@@ -41,7 +48,13 @@ app.set('onlineUsers', onlineUsers);
 
 // Middleware
 app.use(cors({
-  origin: true, // Allow any origin that makes the request
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
