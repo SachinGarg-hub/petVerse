@@ -31,21 +31,31 @@ const CreatePostModal = ({ isOpen, onClose, onRefresh }) => {
     
     try {
       // 1. Upload file to Cloudinary via our server
-      const uploadRes = await uploadFile(file);
-      const mediaUrl = uploadRes.data.url;
+      let mediaUrl;
+      try {
+        const uploadRes = await uploadFile(file);
+        mediaUrl = uploadRes.data.url;
+      } catch (uploadErr) {
+        console.error('File Upload Step Failed:', uploadErr);
+        throw new Error(`File upload failed: ${uploadErr.response?.data?.message || uploadErr.message}`);
+      }
 
       // 2. Create the post with the uploaded URL
-      await createPost({
-        mediaUrl,
-        mediaType,
-        caption
-      });
+      try {
+        await createPost({
+          mediaUrl,
+          mediaType,
+          caption
+        });
+      } catch (postErr) {
+        console.error('Post Creation Step Failed:', postErr);
+        throw new Error(`Post creation failed: ${postErr.response?.data?.message || postErr.message}`);
+      }
 
       onRefresh();
       handleClose();
     } catch (err) {
-      console.error(err);
-      setError(err.response?.data?.message || 'Failed to share post. Please try again.');
+      setError(err.message);
     } finally {
       setLoading(false);
     }

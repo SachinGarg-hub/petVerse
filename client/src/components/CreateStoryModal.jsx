@@ -37,7 +37,9 @@ const CreateStoryModal = ({ isOpen, onClose, onRefresh }) => {
       onRefresh();
       handleClose();
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to upload story');
+      console.error('Story Upload Error:', err);
+      const msg = err.response?.data?.message || err.message || 'Unknown story error';
+      setError(`Story Failed: ${msg}`);
     } finally {
       setLoading(false);
     }
