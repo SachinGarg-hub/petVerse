@@ -32,7 +32,11 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     if (user) {
-      const newSocket = io(import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000');
+      const socketUrl = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000';
+      const newSocket = io(socketUrl, {
+        withCredentials: true,
+        transports: ['polling', 'websocket'] // Ensure both are tried
+      });
       newSocket.emit('addUser', user._id);
       setSocket(newSocket);
 
