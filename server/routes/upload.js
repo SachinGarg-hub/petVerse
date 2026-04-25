@@ -33,33 +33,33 @@ router.post('/', auth, checkCloudinary, upload.single('file'), async (req, res) 
       return res.status(400).json({ message: 'No file uploaded' });
     }
 
-    console.log('📂 Processing upload for:', req.file.originalname, req.file.mimetype);
-
     // Upload to Cloudinary using stream
     const isVideo = req.file.mimetype.startsWith('video');
     
-    const uploadStream = cloudinary.uploader.upload_stream(
-      {
-        folder: 'petverse',
-        resource_type: isVideo ? 'video' : 'image',
-      },
-      (error, result) => {
-        if (error) {
-          console.error('❌ Cloudinary Upload Error:', error);
-          return res.status(500).json({ message: 'Cloudinary upload failed', error });
-        }
-        
-        console.log('✅ Cloudinary Upload Success:', result.secure_url);
-        res.json({ 
-          url: result.secure_url, 
-          public_id: result.public_id,
-          resource_type: result.resource_type
-        });
-      }
-    );
+    const uploadToCloudinary = () => {
+      return new Promise((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream(
+          {
+            folder: 'petverse',
+            resource_type: isVideo ? 'video' : 'image',
+          },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          }
+        );
+        uploadStream.end(req.file.buffer);
+      });
+    };
 
-    // Send the buffer to Cloudinary
-    uploadStream.end(req.file.buffer);
+    const result = await uploadToCloudinary();
+    console.log('✅ Cloudinary Upload Success:', result.secure_url);
+    
+    res.json({ 
+      url: result.secure_url, 
+      public_id: result.public_id,
+      resource_type: result.resource_type
+    });
 
   } catch (error) {
     console.error('❌ Upload processing error:', error);
