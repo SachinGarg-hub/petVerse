@@ -36,30 +36,24 @@ const upload = multer({
 router.post('/', auth, checkCloudinary, upload.single('file'), async (req, res) => {
   try {
     if (!req.file) {
+      console.log('❌ No file in request');
       return res.status(400).json({ message: 'No file uploaded' });
     }
 
-    // Upload to Cloudinary using stream
-    const isVideo = req.file.mimetype.startsWith('video');
-    
-    const uploadToCloudinary = () => {
-      return new Promise((resolve, reject) => {
-        const uploadStream = cloudinary.uploader.upload_stream(
-          {
-            folder: 'petverse',
-            resource_type: isVideo ? 'video' : 'image',
-          },
-          (error, result) => {
-            if (error) reject(error);
-            else resolve(result);
-          }
-        );
-        uploadStream.end(req.file.buffer);
-      });
-    };
+    console.log('📂 Uploading file:', req.file.originalname, 'Size:', req.file.size);
 
-    const result = await uploadToCloudinary();
-    console.log('✅ Cloudinary Upload Success:', result.secure_url);
+    // Convert buffer to base64 Data URI
+    const b64 = Buffer.from(req.file.buffer).toString('base64');
+    const dataURI = "data:" + req.file.mimetype + ";base64," + b64;
+    
+    const isVideo = req.file.mimetype.startsWith('video');
+
+    const result = await cloudinary.uploader.upload(dataURI, {
+      folder: 'petverse',
+      resource_type: isVideo ? 'video' : 'image',
+    });
+
+    console.log('✅ Cloudinary Success:', result.secure_url);
     
     res.json({ 
       url: result.secure_url, 
@@ -68,8 +62,11 @@ router.post('/', auth, checkCloudinary, upload.single('file'), async (req, res) 
     });
 
   } catch (error) {
-    console.error('❌ Upload processing error:', error);
-    res.status(500).json({ message: error.message });
+    console.error('❌ Upload Route Crash:', error);
+    res.status(500).json({ 
+      message: error.message || 'Upload failed', 
+      detail: error 
+    });
   }
 });
 
