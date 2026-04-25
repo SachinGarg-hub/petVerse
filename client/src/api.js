@@ -28,7 +28,11 @@ export const getMe = () => API.get('/auth/me');
 export const uploadFile = (file) => {
   const formData = new FormData();
   formData.append('file', file);
-  return API.post('/upload', formData);
+  return API.post('/upload', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
 };
 
 // Posts

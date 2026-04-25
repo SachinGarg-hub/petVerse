@@ -42,6 +42,7 @@ const upload = multer({ storage: storage });
 // Route to handle single file upload
 router.post('/', auth, checkCloudinary, (req, res) => {
   upload.single('file')(req, res, (err) => {
+    console.log('📂  Received upload request. File:', req.file);
     if (err) {
       console.error('❌  Upload Middleware Error:', err);
       return res.status(500).json({ message: err.message || 'Error occurred during file upload to Cloudinary' });
