@@ -27,8 +27,9 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: '*',
+    origin: true,
     methods: ['GET', 'POST'],
+    credentials: true
   },
 });
 
@@ -40,8 +41,9 @@ app.set('onlineUsers', onlineUsers);
 
 // Middleware
 app.use(cors({
-  origin: '*', // Allow all origins for easier deployment
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  origin: true, // Allow any origin that makes the request
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(express.json({ limit: '50mb' }));
@@ -99,6 +101,15 @@ io.on('connection', (socket) => {
     }
     io.emit('getOnlineUsers', Array.from(onlineUsers.keys()));
     console.log('User disconnected:', socket.id);
+  });
+});
+
+// Global Error Logger - MUST BE LAST
+app.use((err, req, res, next) => {
+  console.error('💥 Global Error Handler:', err);
+  res.status(err.status || 500).json({ 
+    message: err.message || 'Internal Server Error',
+    error: process.env.NODE_ENV === 'development' ? err : {}
   });
 });
 
