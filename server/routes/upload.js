@@ -11,10 +11,14 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-console.log('☁️  Cloudinary Config Check:', {
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME ? '✅ Set' : '❌ Missing',
-  api_key: process.env.CLOUDINARY_API_KEY ? '✅ Set' : '❌ Missing',
-  api_secret: process.env.CLOUDINARY_API_SECRET ? '✅ Set' : '❌ Missing',
+// Diagnostic route
+router.get('/test-config', (req, res) => {
+  res.json({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME ? '✅' : '❌',
+    api_key: process.env.CLOUDINARY_API_KEY ? '✅' : '❌',
+    api_secret: process.env.CLOUDINARY_API_SECRET ? '✅' : '❌',
+    node_env: process.env.NODE_ENV
+  });
 });
 
 // Middleware to check credentials
