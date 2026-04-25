@@ -2,6 +2,8 @@ const User = require('../models/User');
 const Post = require('../models/Post');
 const createNotification = require('../utils/notification');
 
+console.log('📦 PostController Loaded with Post Model');
+
 exports.createPost = async (req, res) => {
   try {
     const { mediaUrl, mediaType, caption } = req.body;
