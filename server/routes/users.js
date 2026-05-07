@@ -1,5 +1,6 @@
 const router = require('express').Router();
 const auth = require('../middleware/auth');
+const checkDemo = require('../middleware/checkDemo');
 const {
   getUser,
   updateProfile,
@@ -11,7 +12,7 @@ const {
 router.get('/search', auth, searchUsers);
 router.get('/suggested', auth, getSuggestedUsers);
 router.get('/:id', getUser);
-router.put('/profile', auth, updateProfile);
-router.put('/:id/follow', auth, followUser);
+router.put('/profile', auth, checkDemo, updateProfile);
+router.put('/:id/follow', auth, checkDemo, followUser);
 
 module.exports = router;

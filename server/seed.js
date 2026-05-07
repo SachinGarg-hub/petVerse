@@ -259,6 +259,7 @@ async function seed() {
     profilePic:
       'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=200&h=200&fit=crop&crop=face',
     bio: '🐾 Pet parent of 3 | Dog mom 🐶 Cat dad 🐱 Bunny bestie 🐰 | Sharing the fluffiest moments of life on PetVerse ✨',
+    role: 'demo',
   });
   console.log(`👤  Created demo user: ${DEMO_USERNAME} (${DEMO_EMAIL})`);
 

@@ -35,6 +35,23 @@ const Login = () => {
     }
   };
 
+  const handleQuickLogin = async (type) => {
+    setLoading(true);
+    const credentials = type === 'admin' 
+      ? { email: 'admin@petverse.com', password: 'Admin@1234' }
+      : { email: 'demo@petverse.com', password: 'Demo@1234' };
+      
+    try {
+      const res = await loginApi(credentials);
+      loginUser(res.data.user, res.data.token);
+      navigate('/');
+    } catch (err) {
+      setError(`No ${type} account found. Please seed the database first.`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen gradient-bg flex items-center justify-center px-4 py-12 relative overflow-hidden">
       {/* Dynamic Background Elements */}
@@ -162,6 +179,29 @@ const Login = () => {
                 'Sign In'
               )}
             </motion.button>
+
+            <div className="grid grid-cols-2 gap-4">
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                type="button"
+                onClick={() => handleQuickLogin('demo')}
+                className="py-3 rounded-2xl bg-amber-100 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-400 text-xs font-black uppercase tracking-widest flex items-center justify-center gap-2"
+              >
+                <MdPets size={16} />
+                Demo User
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                type="button"
+                onClick={() => handleQuickLogin('admin')}
+                className="py-3 rounded-2xl bg-indigo-100 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-400 text-xs font-black uppercase tracking-widest flex items-center justify-center gap-2"
+              >
+                <div className="w-4 h-4 rounded-full bg-indigo-500 flex items-center justify-center text-[10px] text-white">A</div>
+                Admin
+              </motion.button>
+            </div>
 
             <div className="relative flex items-center py-6">
               <div className="flex-grow border-t border-gray-100 dark:border-white/5"></div>

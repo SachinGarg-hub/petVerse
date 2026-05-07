@@ -3,6 +3,7 @@ const router = express.Router();
 const multer = require('multer');
 const cloudinary = require('cloudinary').v2;
 const auth = require('../middleware/auth');
+const checkDemo = require('../middleware/checkDemo');
 
 // Cloudinary configuration
 cloudinary.config({
@@ -37,7 +38,7 @@ const upload = multer({
 });
 
 // Route to handle single file upload
-router.post('/', auth, checkCloudinary, upload.single('file'), async (req, res) => {
+router.post('/', auth, checkDemo, checkCloudinary, upload.single('file'), async (req, res) => {
   try {
     if (!req.file) {
       console.log('❌ No file in request');
