@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { HiOutlineLocationMarker, HiOutlineMail, HiOutlinePhone, HiChevronLeft } from 'react-icons/hi';
 import { MdOutlinePets, MdFormatQuote } from 'react-icons/md';
 import { motion } from 'framer-motion';
+import toast from 'react-hot-toast';
 
 const AdoptionDetail = () => {
   const { id } = useParams();
@@ -34,8 +35,10 @@ const AdoptionDetail = () => {
     try {
       const res = await markAdopted(id);
       setPet(res.data);
+      toast.success('Congratulations! Pet marked as adopted. 💖');
     } catch (err) {
       console.error(err);
+      toast.error('Failed to update status');
     } finally {
       setIsAdopting(false);
     }
@@ -45,9 +48,11 @@ const AdoptionDetail = () => {
     if (!pet) return;
     try {
       await createConversation(pet.user._id);
-      navigate('/chat');
+      toast.success('Starting chat with owner... 💬');
+      navigate('/messages');
     } catch (err) {
       console.error(err);
+      toast.error('Could not start chat');
     }
   };
 

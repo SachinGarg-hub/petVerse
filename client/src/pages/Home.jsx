@@ -7,6 +7,8 @@ import StoryViewer from '../components/StoryViewer';
 import { HiPlus, HiSparkles } from 'react-icons/hi2';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { PostSkeleton } from '../components/ui/Skeleton';
+import EmptyState from '../components/ui/EmptyState';
 
 const Home = () => {
   const { user } = useAuth();
@@ -144,18 +146,11 @@ const Home = () => {
           </button>
         </div>
 
+// ... in the return ...
         {/* Posts List */}
         {loading && page === 1 ? (
           <div className="space-y-6">
-            {[1, 2, 3].map(i => (
-              <div key={i} className="card h-[500px] animate-pulse-slow p-4 flex flex-col gap-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-white/5" />
-                  <div className="h-4 w-32 bg-gray-200 dark:bg-white/5 rounded" />
-                </div>
-                <div className="flex-1 bg-gray-200 dark:bg-white/10 rounded-2xl" />
-              </div>
-            ))}
+            {[1, 2, 3].map(i => <PostSkeleton key={i} />)}
           </div>
         ) : (
           <div className="space-y-6">
@@ -164,15 +159,23 @@ const Home = () => {
                 <PostCard key={post._id} post={post} onUpdate={handleUpdatePost} />
               ))
             ) : (
-              <div className="text-center py-20 px-4 card">
-                <div className="inline-flex w-20 h-20 bg-purple-50 dark:bg-purple-900/10 rounded-full items-center justify-center text-petverse-purple mb-6 animate-bounce">
-                  <HiSparkles size={40} />
-                </div>
-                <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">Feed is quiet...</h3>
-                <p className="text-gray-500 dark:text-gray-400 mb-6">Start following pet owners to see their posts!</p>
-                <button onClick={() => setIsModalOpen(true)} className="btn-primary">
-                  Share the first post
-                </button>
+              <div className="card">
+                <EmptyState 
+                  title={feedType === 'following' ? "No posts from following" : "Feed is quiet..."}
+                  message={feedType === 'following' 
+                    ? "Start following pet owners to see their posts here!" 
+                    : "Be the first one to share a pawesome moment with the community!"}
+                  icon={HiSparkles}
+                  action={
+                    <button 
+                      onClick={() => setIsModalOpen(true)} 
+                      className="btn-primary"
+                      aria-label="Create your first post"
+                    >
+                      Share the first post
+                    </button>
+                  }
+                />
               </div>
             )}
 
@@ -184,6 +187,7 @@ const Home = () => {
                   fetchData(nextPage);
                 }}
                 className="w-full py-4 text-petverse-purple font-bold hover:underline"
+                aria-label="Load more posts"
               >
                 Load more paw-some posts
               </button>

@@ -4,6 +4,8 @@ import { HiOutlineLocationMarker, HiOutlineFilter, HiPlus } from 'react-icons/hi
 import { MdOutlinePets } from 'react-icons/md';
 import { Link } from 'react-router-dom';
 import CreateAdoptionModal from '../components/CreateAdoptionModal';
+import Skeleton from '../components/ui/Skeleton';
+import EmptyState from '../components/ui/EmptyState';
 
 const PetCard = ({ pet }) => (
   <div className="card group overflow-hidden animate-scale-in">
@@ -143,14 +145,15 @@ const Adoption = () => {
         </div>
       )}
 
+// ... in Results Grid ...
       {/* Results Grid */}
       {loading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {[1, 2, 3, 4, 5, 6].map(i => (
-            <div key={i} className="card h-[450px] animate-pulse-slow p-4 flex flex-col gap-4">
-              <div className="flex-1 bg-gray-200 dark:bg-white/5 rounded-2xl" />
-              <div className="h-6 w-2/3 bg-gray-200 dark:bg-white/5 rounded" />
-              <div className="h-10 w-full bg-gray-200 dark:bg-white/5 rounded-xl" />
+            <div key={i} className="card p-4 flex flex-col gap-4">
+              <Skeleton className="flex-1 aspect-[4/5] rounded-2xl" />
+              <Skeleton className="h-6 w-2/3" />
+              <Skeleton className="h-10 w-full rounded-xl" />
             </div>
           ))}
         </div>
@@ -163,12 +166,24 @@ const Adoption = () => {
               ))}
             </div>
           ) : (
-            <div className="text-center py-20 card">
-              <div className="inline-flex w-20 h-20 bg-gray-50 dark:bg-white/5 rounded-full items-center justify-center text-gray-300 mb-6">
-                <MdOutlinePets size={40} />
-              </div>
-              <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">No buddies found</h3>
-              <p className="text-gray-500 dark:text-gray-400">Try adjusting your filters or checking back later!</p>
+            <div className="card">
+              <EmptyState 
+                title="No buddies found"
+                message="Try adjusting your filters or checking back later! New pets are added to the pack every day."
+                icon={MdOutlinePets}
+                action={
+                  <button 
+                    onClick={() => {
+                      setFilters({ petType: '', location: '', age: '' });
+                      setShowFilters(true);
+                    }}
+                    className="btn-primary"
+                    aria-label="Reset filters"
+                  >
+                    Clear all filters
+                  </button>
+                }
+              />
             </div>
           )}
         </>

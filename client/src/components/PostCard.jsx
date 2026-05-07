@@ -12,6 +12,8 @@ import { useAuth } from '../context/AuthContext';
 import { likePost, commentOnPost, savePost, getLikers } from '../api';
 import { formatDistanceToNow } from 'date-fns';
 import UserListModal from './UserListModal';
+import ImageLightbox from './ui/ImageLightbox';
+import toast from 'react-hot-toast';
 
 const PostCard = ({ post, onUpdate }) => {
   const { user } = useAuth();
@@ -24,6 +26,7 @@ const PostCard = ({ post, onUpdate }) => {
   const [isLikersModalOpen, setIsLikersModalOpen] = useState(false);
   const [likers, setLikers] = useState([]);
   const [loadingLikers, setLoadingLikers] = useState(false);
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
 
   const fetchLikers = async () => {
     setIsLikersModalOpen(true);
@@ -49,6 +52,9 @@ const PostCard = ({ post, onUpdate }) => {
       
       const res = await likePost(post._id);
       onUpdate(res.data);
+      if (newIsLiked) {
+        toast.success('Post liked! 🐾', { icon: '❤️', duration: 1500 });
+      }
     } catch (err) {
       console.error(err);
       // Revert on error
@@ -64,6 +70,7 @@ const PostCard = ({ post, onUpdate }) => {
       const res = await commentOnPost(post._id, commentText);
       onUpdate(res.data);
       setCommentText('');
+      toast.success('Comment posted!', { duration: 1500 });
     } catch (err) {
       console.error(err);
     }
@@ -102,7 +109,7 @@ const PostCard = ({ post, onUpdate }) => {
       </div>
 
       {/* Content */}
-      <div className="relative group" onDoubleClick={handleLike}>
+      <div className="relative group cursor-zoom-in" onDoubleClick={handleLike} onClick={() => post.mediaType === 'image' && setIsLightboxOpen(true)}>
         {post.mediaType === 'image' ? (
           <img src={post.mediaUrl} alt="post content" className="w-full aspect-square object-cover" />
         ) : (
@@ -117,18 +124,36 @@ const PostCard = ({ post, onUpdate }) => {
         )}
       </div>
 
+      <ImageLightbox 
+        src={post.mediaUrl} 
+        isOpen={isLightboxOpen} 
+        onClose={() => setIsLightboxOpen(false)} 
+      />
+
       {/* Actions */}
       <div className="p-4">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-4">
-            <button onClick={handleLike} className={`transition-transform active:scale-150 ${isLiked ? 'text-red-500' : 'text-gray-600 dark:text-gray-300'}`}>
+            <button 
+              onClick={handleLike} 
+              aria-label={isLiked ? "Unlike post" : "Like post"}
+              className={`transition-transform active:scale-150 ${isLiked ? 'text-red-500' : 'text-gray-600 dark:text-gray-300'}`}
+            >
               {isLiked ? <HiHeart size={30} className="like-animation" /> : <HiOutlineHeart size={30} />}
             </button>
-            <button onClick={() => setShowComments(!showComments)} className="text-gray-600 dark:text-gray-300">
+            <button 
+              onClick={() => setShowComments(!showComments)} 
+              aria-label="Toggle comments"
+              className="text-gray-600 dark:text-gray-300"
+            >
               <HiChatBubbleOvalLeft size={30} />
             </button>
           </div>
-          <button onClick={handleSave} className={isSaved ? 'text-petverse-purple' : 'text-gray-600 dark:text-gray-300'}>
+          <button 
+            onClick={handleSave} 
+            aria-label={isSaved ? "Unsave post" : "Save post"}
+            className={isSaved ? 'text-petverse-purple' : 'text-gray-600 dark:text-gray-300'}
+          >
             {isSaved ? <HiBookmark size={30} /> : <HiOutlineBookmark size={30} />}
           </button>
         </div>

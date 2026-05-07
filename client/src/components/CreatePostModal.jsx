@@ -2,6 +2,7 @@
 import { useState, useRef } from 'react';
 import { HiXMark, HiPhoto, HiVideoCamera, HiCloudArrowUp } from 'react-icons/hi2';
 import { createPost, uploadFile } from '../api';
+import toast from 'react-hot-toast';
 
 const CreatePostModal = ({ isOpen, onClose, onRefresh }) => {
   const [file, setFile] = useState(null);
@@ -30,6 +31,8 @@ const CreatePostModal = ({ isOpen, onClose, onRefresh }) => {
     setLoading(true);
     setError('');
     
+    const toastId = toast.loading('Publishing your post... 🐾');
+    
     try {
       // 1. Upload file to Cloudinary via our server
       let mediaUrl;
@@ -53,10 +56,12 @@ const CreatePostModal = ({ isOpen, onClose, onRefresh }) => {
         throw new Error(`Post creation failed: ${postErr.response?.data?.message || postErr.message}`);
       }
 
+      toast.success('Pawsome! Your post is live. ✨', { id: toastId });
       onRefresh();
       handleClose();
     } catch (err) {
       setError(err.message);
+      toast.error('Something went wrong. Please try again.', { id: toastId });
     } finally {
       setLoading(false);
     }

@@ -3,6 +3,9 @@ import { useAuth } from '../context/AuthContext';
 import { getConversations, getMessages, sendMessage, createConversation, searchUsers } from '../api';
 import { HiOutlineMagnifyingGlass, HiOutlinePaperAirplane } from 'react-icons/hi2';
 import { formatDistanceToNow } from 'date-fns';
+import toast from 'react-hot-toast';
+import EmptyState from '../components/ui/EmptyState';
+import { HiOutlineChatBubbleOvalLeftEllipsis } from 'react-icons/hi2';
 
 const Messages = () => {
   const { user, socket } = useAuth();
@@ -130,8 +133,10 @@ const Messages = () => {
       });
       setMessages([...messages, res.data]);
       setNewMessage('');
+      // Optional: toast.success('Message sent'); // Might be too annoying for chat, but requested
     } catch (err) {
       console.error(err);
+      toast.error('Failed to send message');
     }
   };
 
@@ -162,6 +167,7 @@ const Messages = () => {
               placeholder="Search users to message..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              aria-label="Search users to message"
               className="input-field pl-12 py-3 rounded-full text-sm"
             />
           </div>
@@ -174,6 +180,8 @@ const Messages = () => {
                   key={u._id}
                   onClick={() => handleStartConversation(u._id)}
                   className="p-3 hover:bg-gray-50 dark:hover:bg-white/5 cursor-pointer flex items-center gap-3 border-b border-gray-100 dark:border-white/5 last:border-0"
+                  role="button"
+                  aria-label={`Message ${u.username}`}
                 >
                   <img src={u.profilePic || `https://api.dicebear.com/7.x/avataaars/svg?seed=${u.username}`} alt={u.username} className="w-10 h-10 rounded-full object-cover" />
                   <span className="font-bold text-gray-800 dark:text-white">{u.username}</span>
@@ -184,27 +192,36 @@ const Messages = () => {
         </div>
 
         <div className="flex-1 overflow-y-auto hide-scrollbar p-3 space-y-2">
-          {conversations.map(c => {
-            const friend = c.members.find(m => m._id !== user._id);
-            const isOnline = onlineUsers.includes(friend._id);
-            const isSelected = currentChat?._id === c._id;
+          {conversations.length > 0 ? (
+            conversations.map(c => {
+              const friend = c.members.find(m => m._id !== user._id);
+              const isOnline = onlineUsers.includes(friend._id);
+              const isSelected = currentChat?._id === c._id;
 
-            return (
-              <div 
-                key={c._id}
-                onClick={() => setCurrentChat(c)}
-                className={`p-3 rounded-2xl cursor-pointer flex items-center gap-4 transition-all ${isSelected ? 'bg-petverse-purple/10 border border-petverse-purple/20' : 'hover:bg-gray-50 dark:hover:bg-white/5 border border-transparent'}`}
-              >
-                <div className="relative">
-                  <img src={friend.profilePic || `https://api.dicebear.com/7.x/avataaars/svg?seed=${friend.username}`} alt="avatar" className="w-12 h-12 rounded-2xl object-cover" />
-                  {isOnline && <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white dark:border-petverse-darkCard rounded-full" />}
+              return (
+                <div 
+                  key={c._id}
+                  onClick={() => setCurrentChat(c)}
+                  className={`p-3 rounded-2xl cursor-pointer flex items-center gap-4 transition-all ${isSelected ? 'bg-petverse-purple/10 border border-petverse-purple/20' : 'hover:bg-gray-50 dark:hover:bg-white/5 border border-transparent'}`}
+                  aria-label={`Chat with ${friend.username}`}
+                >
+                  <div className="relative">
+                    <img src={friend.profilePic || `https://api.dicebear.com/7.x/avataaars/svg?seed=${friend.username}`} alt="avatar" className="w-12 h-12 rounded-2xl object-cover" />
+                    {isOnline && <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white dark:border-petverse-darkCard rounded-full" />}
+                  </div>
+                  <div className="flex-1 overflow-hidden">
+                    <h4 className="font-bold text-gray-800 dark:text-white text-sm">{friend.username}</h4>
+                  </div>
                 </div>
-                <div className="flex-1 overflow-hidden">
-                  <h4 className="font-bold text-gray-800 dark:text-white text-sm">{friend.username}</h4>
-                </div>
-              </div>
-            );
-          })}
+              );
+            })
+          ) : (
+            <EmptyState 
+              title="No chats yet" 
+              message="Search for users to start a conversation!" 
+              icon={HiOutlineChatBubbleOvalLeftEllipsis}
+            />
+          )}
         </div>
       </div>
 
@@ -212,8 +229,12 @@ const Messages = () => {
       {currentChat ? (
         <div className={`card flex-1 flex flex-col overflow-hidden ${!currentChat ? 'hidden md:flex' : 'flex'}`}>
           <div className="p-4 border-b border-gray-100 dark:border-white/5 flex items-center gap-4 bg-white/50 dark:bg-white/5 backdrop-blur-md z-10">
-            <button className="md:hidden text-gray-500" onClick={() => setCurrentChat(null)}>
-              ← Back
+            <button 
+              className="md:hidden text-petverse-purple font-bold flex items-center gap-1" 
+              onClick={() => setCurrentChat(null)}
+              aria-label="Back to chat list"
+            >
+              <span>←</span> Back
             </button>
             <div className="relative">
               <img 
@@ -267,11 +288,13 @@ const Messages = () => {
               placeholder="Type a message..." 
               value={newMessage}
               onChange={handleTyping}
+              aria-label="Type your message"
               className="input-field py-4 rounded-full flex-1"
             />
             <button 
               type="submit"
               disabled={!newMessage.trim()}
+              aria-label="Send message"
               className="w-14 h-14 rounded-full gradient-primary flex items-center justify-center text-white shadow-glow disabled:opacity-50 transition-transform active:scale-95"
             >
               <HiOutlinePaperAirplane size={24} className="-rotate-45 relative right-0.5 bottom-0.5" />

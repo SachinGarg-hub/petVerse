@@ -60,11 +60,33 @@ function AppContent() {
   );
 }
 
+import { Toaster } from 'react-hot-toast';
+import ErrorBoundaryWrapper from './components/ui/ErrorBoundaryWrapper';
+
 function App() {
   return (
     <AuthProvider>
+      <Toaster 
+        position="top-center"
+        toastOptions={{
+          style: {
+            background: '#1F2937',
+            color: '#fff',
+            borderRadius: '16px',
+            padding: '16px',
+          },
+          success: {
+            iconTheme: {
+              primary: '#A855F7',
+              secondary: '#fff',
+            },
+          },
+        }}
+      />
       <Router>
-        <AppContent />
+        <ErrorBoundaryWrapper>
+          <AppContent />
+        </ErrorBoundaryWrapper>
       </Router>
     </AuthProvider>
   );
